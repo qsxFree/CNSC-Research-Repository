@@ -30,7 +30,7 @@ public class UserController {
         return userService.retrieveUserByid(id);
     }
 
-    @GetMapping("/api/v1/account/")
+    @GetMapping("/api/v1/account")
     public List<UserDto> getUsers()  {
         return userService.retrieveUsers();
     }
