@@ -51,8 +51,8 @@ public class CsvHandler {
     public List<String []> getRows() throws IOException, CsvException, InvalidCsvFieldException {
         List<String []>  rows = reader.readAll();
         validateField(Arrays.asList(rows.get(0)));
-
-        rows.remove(0);
+        rows.remove(0);   // The 1st row csv will contain the fields or the column info.
+                                // so such row must remove before returning the rows of data
         reader.close();
         return rows;
     }
@@ -64,7 +64,7 @@ public class CsvHandler {
                 for (String validField : fieldList ) {
                     if (validField.equalsIgnoreCase(field)){
                         logger.info(String.format("validation : %s is equal to %s",field,validField));
-                        rowIndex.put(fieldList.get(0),validFieldCount);//to identify field arrangement
+                        rowIndex.put(fieldList.get(0).toUpperCase(),validFieldCount);//to identify field arrangement
                         validFieldCount++;
                         break;
                     }
@@ -74,7 +74,13 @@ public class CsvHandler {
         if (validFieldCount != 9) throw new InvalidCsvFieldException("Please put valid fields on csv file.");
     }
 
-    public Map<String, Integer> getRowIndex() {
+
+    /**
+     * Gets row indices.
+     * returns the 1st row of csv that contains the cell identifier or the field
+     * @return the row indices
+     */
+    public Map<String, Integer> getRowIndices() {
         return rowIndex;
     }
 
