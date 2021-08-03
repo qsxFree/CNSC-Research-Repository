@@ -11,6 +11,7 @@ public class Researchers {
 
     @Id
     @Column(name = "researcher_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer researcherId;
 
     @Column(name = "name", nullable = false, length = 250)

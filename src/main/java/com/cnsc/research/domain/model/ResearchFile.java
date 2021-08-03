@@ -3,16 +3,15 @@ package com.cnsc.research.domain.model;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Objects;
 
 @Entity
-@Table(name = "research_file", schema = "research_repository")
+@Table(name = "research_file")
 @Data
 public class ResearchFile {
 
     @Id
     @Column(name = "file_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer fileId;
 
     @Column(name = "title", nullable = false, length = 250)

@@ -5,7 +5,6 @@ import lombok.Data;
 import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Objects;
 import java.util.Set;
 
 @Table(name = "Research")
@@ -14,6 +13,7 @@ import java.util.Set;
 public class Research {
     @Id
     @Column(name = "research_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer researchId;
 
     @Column(name = "budget", nullable = false, precision = 0)
