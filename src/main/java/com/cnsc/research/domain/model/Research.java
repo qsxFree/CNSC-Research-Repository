@@ -1,15 +1,21 @@
 package com.cnsc.research.domain.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Table(name = "Research")
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
 public class Research {
     @Id
     @Column(name = "research_id", nullable = false)
@@ -17,13 +23,13 @@ public class Research {
     private Integer researchId;
 
     @Column(name = "budget", nullable = false, precision = 0)
-    private Integer budget;
+    private Double budget;
 
     @Column(name = "start_date")
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "remarks", length = 300)
     private String remarks;
@@ -32,10 +38,10 @@ public class Research {
     private Byte deleted;
 
     @Column(name = "datetime_deleted")
-    private Timestamp datetimeDeleted;
+    private LocalDateTime datetimeDeleted;
 
     @Column(name = "datetime_added", nullable = false)
-    private Timestamp datetimeAdded;
+    private LocalDateTime datetimeAdded;
 
     @OneToOne
     @JoinColumn(name = "research_file",referencedColumnName = "file_id")

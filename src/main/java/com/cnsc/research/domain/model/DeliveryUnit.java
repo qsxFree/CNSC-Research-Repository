@@ -1,6 +1,8 @@
 package com.cnsc.research.domain.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -8,6 +10,8 @@ import java.util.Collection;
 @Entity
 @Table(name = "delivery_unit")
 @Data
+@Builder
+@NoArgsConstructor
 public class DeliveryUnit {
 
     @Id

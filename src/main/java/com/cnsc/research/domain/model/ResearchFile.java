@@ -1,12 +1,16 @@
 package com.cnsc.research.domain.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "research_file")
 @Data
+@Builder
+@NoArgsConstructor
 public class ResearchFile {
 
     @Id
