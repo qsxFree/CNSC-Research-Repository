@@ -1,12 +1,19 @@
 package com.cnsc.research.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
 @Table(name = "research_status")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResearchStatus {
 
     @Id
