@@ -19,7 +19,7 @@ public class ResearchDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String researchStatus;
-    private String DeliveryUnit;
+    private String deliveryUnit;
     private String remarks;
     private List<String> researchers;
 

@@ -2,6 +2,7 @@ package com.cnsc.research.service;
 
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
 import com.cnsc.research.domain.exception.InvalidResearchStatusException;
+import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
 import com.cnsc.research.domain.transaction.ResearchDto;
@@ -16,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ResearchService {
@@ -29,12 +30,14 @@ public class ResearchService {
     private final ResearchFileRepository researchFileRepository;
     private final ResearchRepository researchRepository;
     private final ResearchStatusRepository researchStatusRepository;
-
+    private final ResearchMapper researchMapper;
 
     @Value("${csv-static-directory}")
     private String csvStaticDirectory;
+
     private MultipartFile multipartFile;
     private CsvHandler csv;
+
 
     @Autowired
     public ResearchService(Logger logger,
@@ -43,7 +46,8 @@ public class ResearchService {
                            ResearchersRepository researchersRepository,
                            ResearchFileRepository researchFileRepository,
                            ResearchRepository researchRepository,
-                           ResearchStatusRepository researchStatusRepository
+                           ResearchStatusRepository researchStatusRepository,
+                           ResearchMapper researchMapper
     ) {
 
         this.logger = logger;
@@ -53,61 +57,26 @@ public class ResearchService {
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
         this.researchStatusRepository = researchStatusRepository;
+        this.researchMapper = researchMapper;
     }
 
-
-    /**
-     * To save all the data at once.
-     *
-     * @param multipartFile the multipart file
-     * @throws InvalidCsvFieldException the invalid csv field exception
-     * @throws CsvException             the csv exception
-     * @throws IOException              the io exception
-     */
-    public void addBatch(MultipartFile multipartFile) throws InvalidCsvFieldException, CsvException, IOException {
-        this.multipartFile = multipartFile;
-        csv = rewriteFileToLocal();
-        List<String[]> rows = csv.getRows();
-    }
 
     private CsvHandler rewriteFileToLocal() throws IOException {
         File file = new File(csvStaticDirectory + multipartFile.getOriginalFilename());//creating directory
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-            logger.info("writing file...");
-            fileOutputStream.write(multipartFile.getBytes());//rewriting temporary file
-            return new CsvHandler(file);
-        } catch (IOException e) {
-            throw new IOException();
-        }
+
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+        logger.info("writing file...");
+
+        fileOutputStream.write(multipartFile.getBytes());//rewriting temporary file
+        CsvHandler handler = new CsvHandler(file);
+        //TODO add delete function after reading data
+        return handler;
     }
 
-
-    private static int
-            titleIndex,
-            researchersIndex,
-            unitIndex,
-            agencyIndex,
-            budgetIndex,
-            startIndex,
-            endIndex,
-            statusIndex,
-            remarksIndex;
-
-    private void assignFieldIndices() {
-        Map<String, Integer> indices = csv.getRowIndices();
-        titleIndex = indices.get(ResearchFields.TITLE.name());
-        researchersIndex = indices.get(ResearchFields.RESEARCHERS.name());
-        unitIndex = indices.get(ResearchFields.DELIVERY_UNIT.name());
-        agencyIndex = indices.get(ResearchFields.FUNDING_AGENCY.name());
-        budgetIndex = indices.get(ResearchFields.BUDGET.name());
-        startIndex = indices.get(ResearchFields.START_DATE.name());
-        endIndex = indices.get(ResearchFields.END_DATE.name());
-        statusIndex = indices.get(ResearchFields.STATUS.name());
-        remarksIndex = indices.get(ResearchFields.REMARK.name());
-    }
 
     //TODO saving research
-    private void saveResearch(List<String[]> rows) {
+    public void saveResearches(List<String[]> rows) {
         /*rows.forEach(row -> {
             Research research = new Research();
             research.setBudget(Double.valueOf(row[budgetIndex]));
@@ -115,6 +84,11 @@ public class ResearchService {
             research.setStartDate(LocalDate.from(formatter.parse(row[startIndex])));
             //TODO add research
         });*/
+    }
+
+    public void saveResearch(Research research) {
+        //TODO saving individual research
+        //TODO Add some validation
     }
 
     //It will build if and only if there is no data occurrence from database
@@ -168,54 +142,10 @@ public class ResearchService {
                 .orElseThrow(() -> new InvalidResearchStatusException(researchTitle));
     }
 
-
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
-        List<ResearchDto> researches = new ArrayList<>();
         this.multipartFile = file;
-        logger.info("File rewritten : "+multipartFile.getOriginalFilename());
         csv = rewriteFileToLocal();
-        List<String[]> rows = csv.getRows();
-        assignFieldIndices();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        rows.forEach(row -> {
-            String[] researchers = row[researchersIndex].split(",");
-            List<String> researcherList = new ArrayList<>();
-            for (String researcher : researchers) {
-                researcherList.add(researcher.trim());
-            }
-            researches.add(
-                    new ResearchDto(
-                            null,
-                            row[titleIndex],
-                            row[agencyIndex],
-                            Double.valueOf(row[budgetIndex]),
-                            LocalDate.from(formatter.parse(row[startIndex])),
-                            LocalDate.from(formatter.parse(row[endIndex])),
-                            row[statusIndex],
-                            row[unitIndex],
-                            row[remarksIndex],
-                            researcherList
-                    )
-            );
-        });
-        return researches;
+        return researchMapper.csvToResearchDto(csv.getRows(), csv.getRowIndices());
     }
 
-
-    private enum ResearchFields {
-        TITLE,
-        RESEARCHERS,
-        DELIVERY_UNIT,
-        FUNDING_AGENCY,
-        BUDGET,
-        START_DATE,
-        END_DATE,
-        STATUS,
-        REMARK;
-
-        @Override
-        public String toString() {
-            return this.name();
-        }
-    }
 }
