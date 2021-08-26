@@ -26,6 +26,9 @@ public class ResearchFile {
     @Column(name = "file_name", nullable = true, length = 250)
     private String fileName;
 
+    @OneToOne(mappedBy = "fileIdByResearchFile", fetch = FetchType.LAZY)
+    private Research research;
+
     @Transient
     private Byte deleted;
 

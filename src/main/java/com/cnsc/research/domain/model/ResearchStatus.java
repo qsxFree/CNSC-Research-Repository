@@ -24,7 +24,7 @@ public class ResearchStatus {
     @Column(name = "status_type", nullable = false, length = 30)
     private String statusType;
 
-    @OneToMany(mappedBy = "researchStatusByResearchStatus")
+    @OneToMany(mappedBy = "researchStatusByResearchStatus", fetch = FetchType.LAZY)
     private Collection<Research> researchByStatusId;
 
 }

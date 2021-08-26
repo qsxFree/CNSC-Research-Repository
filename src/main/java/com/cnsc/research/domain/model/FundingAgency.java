@@ -24,7 +24,7 @@ public class FundingAgency {
     @Column(name = "agency_name", nullable = false, length = 250)
     private String agencyName;
 
-    @OneToMany(mappedBy = "fundingAgencyByFundingAgency")
+    @OneToMany(mappedBy = "fundingAgencyByFundingAgency", fetch = FetchType.LAZY)
     private Set<Research> researchByAgencyId;
 
 }

@@ -23,6 +23,6 @@ public class Researchers {
     @Column(name = "name", nullable = false, length = 250)
     private String name;
 
-    @ManyToMany(mappedBy = "researchers")
+    @ManyToMany(mappedBy = "researchers", fetch = FetchType.LAZY)
     private Set<Research> researches;
 }

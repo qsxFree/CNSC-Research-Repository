@@ -24,7 +24,7 @@ public class DeliveryUnit {
     @Column(name = "unit_name", nullable = false, length = 250)
     private String unitName;
 
-    @OneToMany(mappedBy = "deliveryUnitByDeliveryUnit")
+    @OneToMany(mappedBy = "deliveryUnitByDeliveryUnit", fetch = FetchType.LAZY)
     private Collection<Research> researchByUnitId;
 
 

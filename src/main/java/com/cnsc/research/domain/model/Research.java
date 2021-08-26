@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -36,33 +34,35 @@ public class Research {
     @Column(name = "remarks", length = 300)
     private String remarks;
 
-    @Column(name = "deleted", nullable = false)
+    @Transient
+    @Column(name = "deleted")
     private Byte deleted;
 
     @Column(name = "datetime_deleted")
     private LocalDateTime datetimeDeleted;
 
-    @Column(name = "datetime_added", nullable = false)
+    @Transient
+    @Column(name = "datetime_added")
     private LocalDateTime datetimeAdded;
 
-    @OneToOne
-    @JoinColumn(name = "research_file",referencedColumnName = "file_id")
-    private ResearchFile file_id;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "file_id", referencedColumnName = "file_id")
+    private ResearchFile fileIdByResearchFile;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "funding_agency", referencedColumnName = "agency_id")
     private FundingAgency fundingAgencyByFundingAgency;
 
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "research_status", referencedColumnName = "status_id")
     private ResearchStatus researchStatusByResearchStatus;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "delivery_unit", referencedColumnName = "unit_id")
     private DeliveryUnit deliveryUnitByDeliveryUnit;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "research_researcher_rel",
             joinColumns = @JoinColumn(name = "research_id"),
