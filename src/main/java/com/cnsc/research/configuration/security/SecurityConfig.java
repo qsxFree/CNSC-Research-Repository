@@ -51,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         }
                 )
                 .and().authorizeRequests()
-                .antMatchers("/api/v1/account", "/actuator").hasRole("SUPER_ADMIN")
+                .antMatchers("/api/account/**", "/actuator", "/api/research/**").hasRole("SUPER_ADMIN")
                 .antMatchers("/", "/login").permitAll()
                 .anyRequest().authenticated()
                 .and().addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
