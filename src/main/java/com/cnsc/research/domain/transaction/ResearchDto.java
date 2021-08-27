@@ -14,7 +14,7 @@ public class ResearchDto {
 
     private Integer id;
     private String researchTitle;
-    private String fundingAgency;
+    private List<String> fundingAgency;
     private Double budget;
     private LocalDate startDate;
     private LocalDate endDate;

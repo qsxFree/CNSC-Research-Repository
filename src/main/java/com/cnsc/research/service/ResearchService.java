@@ -1,7 +1,6 @@
 package com.cnsc.research.service;
 
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
-import com.cnsc.research.domain.exception.InvalidResearchStatusException;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
@@ -29,7 +28,6 @@ public class ResearchService {
     private final ResearchersRepository researchersRepository;
     private final ResearchFileRepository researchFileRepository;
     private final ResearchRepository researchRepository;
-    private final ResearchStatusRepository researchStatusRepository;
     private final ResearchMapper researchMapper;
 
     @Value("${csv-static-directory}")
@@ -46,7 +44,6 @@ public class ResearchService {
                            ResearchersRepository researchersRepository,
                            ResearchFileRepository researchFileRepository,
                            ResearchRepository researchRepository,
-                           ResearchStatusRepository researchStatusRepository,
                            ResearchMapper researchMapper
     ) {
 
@@ -56,7 +53,6 @@ public class ResearchService {
         this.researchersRepository = researchersRepository;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
-        this.researchStatusRepository = researchStatusRepository;
         this.researchMapper = researchMapper;
     }
 
@@ -136,11 +132,7 @@ public class ResearchService {
         );
     }
 
-    private ResearchStatus validateStatus(String statusName, String researchTitle) throws InvalidResearchStatusException {
-        Optional<ResearchStatus> researchStatus = researchStatusRepository.findByStatusTypeIgnoreCase(statusName);
-        return researchStatus
-                .orElseThrow(() -> new InvalidResearchStatusException(researchTitle));
-    }
+    //TODO add validate status here
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
         this.multipartFile = file;

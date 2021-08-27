@@ -49,16 +49,18 @@ public class Research {
     @JoinColumn(name = "file_id", referencedColumnName = "file_id")
     private ResearchFile fileIdByResearchFile;
 
-    @ManyToOne(cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "funding_agency", referencedColumnName = "agency_id")
-    private FundingAgency fundingAgencyByFundingAgency;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "research_agency_rel",
+            joinColumns = @JoinColumn(name = "research_id"),
+            inverseJoinColumns = @JoinColumn(name = "agency_id")
+    )
+    private Set<FundingAgency> fundingAgencies;
 
+    @Enumerated(EnumType.STRING)
+    private ResearchStatus researchStatus;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "research_status", referencedColumnName = "status_id")
-    private ResearchStatus researchStatusByResearchStatus;
-
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "delivery_unit", referencedColumnName = "unit_id")
     private DeliveryUnit deliveryUnitByDeliveryUnit;
 

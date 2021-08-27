@@ -1,5 +1,6 @@
 package com.cnsc.research.domain.mapper;
 
+import com.cnsc.research.domain.model.FundingAgency;
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.transaction.ResearchDto;
@@ -31,9 +32,14 @@ public class ResearchMapper {
         LocalDate endDate = research.getEndDate();
         String remarks = research.getRemarks();
         String researchTitle = research.getFileIdByResearchFile().getTitle();
-        String fundingAgency = research.getFundingAgencyByFundingAgency().getAgencyName();
+
+        List<String> fundingAgencies = research.getFundingAgencies()
+                .stream()
+                .map(FundingAgency::getAgencyName)
+                .collect(Collectors.toList());
+
         String deliveryUnit = research.getDeliveryUnitByDeliveryUnit().getUnitName();
-        String researchStatus = research.getResearchStatusByResearchStatus().getStatusType();
+        String researchStatus = research.getResearchStatus().name();
         List<String> researchers = research.getResearchers()
                 .stream()
                 .map(Researchers::getName)
@@ -43,7 +49,7 @@ public class ResearchMapper {
         return new ResearchDto(
                 id,
                 researchTitle,
-                fundingAgency,
+                fundingAgencies,
                 budget,
                 startDate,
                 endDate,
@@ -74,8 +80,14 @@ public class ResearchMapper {
 
     public ResearchDto csvToResearchDto(String[] csvRow, Map<String, Integer> indices) {
         String[] researchers = csvRow[indices.get("RESEARCHERS")].split(",");
+        String[] fundingAgency = csvRow[indices.get("FUNDING_AGENCY")].split(",");
 
         List<String> researcherList = Arrays.stream(researchers)
+                .map(String::trim)
+                //.distinct()
+                .collect(Collectors.toList());
+
+        List<String> fundingAgencies = Arrays.stream(fundingAgency)
                 .map(String::trim)
                 //.distinct()
                 .collect(Collectors.toList());
@@ -83,7 +95,7 @@ public class ResearchMapper {
         return new ResearchDto(
                 null,
                 csvRow[indices.get("TITLE")],
-                csvRow[indices.get("FUNDING_AGENCY")],
+                fundingAgencies,
                 Double.valueOf(csvRow[indices.get("BUDGET")]),
                 LocalDate.from(formatter.parse(csvRow[indices.get("START_DATE")])),
                 LocalDate.from(formatter.parse(csvRow[indices.get("END_DATE")])),
