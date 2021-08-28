@@ -64,18 +64,6 @@ public class ResearchService {
     }
 
 
-    private CsvHandler rewriteFileToLocal() throws IOException {
-        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
-
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-
-        logger.info("writing file...");
-
-        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
-        CsvHandler handler = new CsvHandler(file);
-        //TODO add delete function after reading data
-        return handler;
-    }
 
 
     public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
@@ -107,7 +95,6 @@ public class ResearchService {
     }
 
 
-    //It will build if and only if there is no data occurrence from database
     private DeliveryUnit buildDeliveryUnit(String name) {
         Optional<DeliveryUnit> deliveryUnit = deliveryUnitRepository.findByUnitNameIgnoreCase(name);
         return deliveryUnit.orElse(DeliveryUnit
@@ -123,7 +110,6 @@ public class ResearchService {
                 .build();
     }
 
-    //It will build if and only if there is no data occurrence from database
     private FundingAgency buildFundingAgency(String agencyName) {
         Optional<FundingAgency> fundingAgency = fundingAgencyRepository.findByAgencyNameIgnoreCase(agencyName);
         return fundingAgency.orElse(FundingAgency
@@ -142,7 +128,6 @@ public class ResearchService {
         );
     }
 
-    //TODO add validate status here
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
         this.csvFile = file;
@@ -150,11 +135,26 @@ public class ResearchService {
         return researchMapper.csvToResearchDto(csv.getRows(), csv.getRowIndices());
     }
 
+    private CsvHandler rewriteFileToLocal() throws IOException {
+        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
+
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+        logger.info("writing file...");
+
+        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
+        CsvHandler handler = new CsvHandler(file);
+        file.delete();
+        return handler;
+    }
+
+
     public String processPdf(String title, MultipartFile pdfFile) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
         String newName = title.replaceAll(" ", "-");
         File file = new File(staticDirectory + "pdf/" + newName + ".pdf");
 
-        if (file.exists()) throw new FileAlreadyExistsException(format("%s file already exist", newName));
+        if (file.exists())
+            throw new FileAlreadyExistsException(format("%s file already exist", newName));
         else if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
             throw new InvalidFileFormat(format("%s is not a pdf file"));
 
