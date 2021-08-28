@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Table(name = "Research")
 @Entity
@@ -47,7 +47,7 @@ public class Research {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "file_id", referencedColumnName = "file_id")
-    private ResearchFile fileIdByResearchFile;
+    private ResearchFile researchFile;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
@@ -55,7 +55,7 @@ public class Research {
             joinColumns = @JoinColumn(name = "research_id"),
             inverseJoinColumns = @JoinColumn(name = "agency_id")
     )
-    private Set<FundingAgency> fundingAgencies;
+    private List<FundingAgency> fundingAgencies;
 
     @Enumerated(EnumType.STRING)
     private ResearchStatus researchStatus;
@@ -70,7 +70,7 @@ public class Research {
             joinColumns = @JoinColumn(name = "research_id"),
             inverseJoinColumns = @JoinColumn(name = "researcher_id")
     )
-    private Set<Researchers> researchers;
+    private List<Researchers> researchers;
 
 
 }

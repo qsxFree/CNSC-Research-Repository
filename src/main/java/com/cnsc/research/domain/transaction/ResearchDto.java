@@ -22,6 +22,7 @@ public class ResearchDto {
     private String deliveryUnit;
     private String remarks;
     private List<String> researchers;
+    private String researchFile;
 
 
 }
