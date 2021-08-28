@@ -5,6 +5,7 @@ import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
+import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.CsvHandler;
 import com.opencsv.exceptions.CsvException;
@@ -22,6 +23,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -76,40 +78,34 @@ public class ResearchService {
     }
 
 
-    //TODO saving research
-    public void saveResearches(List<String[]> rows) {
-        /*rows.forEach(row -> {
-            Research research = new Research();
-            research.setBudget(Double.valueOf(row[budgetIndex]));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-            research.setStartDate(LocalDate.from(formatter.parse(row[startIndex])));
-            //TODO add research
-        });*/
+    public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
+        List<ResearchBatchSaveResponse> researchBatchSaveResponses = new ArrayList<>();
+        researchDtos.forEach(researchDto -> researchBatchSaveResponses.add(saveResearch(researchDto)));
+        return researchBatchSaveResponses;
     }
 
-    public void saveResearch(Research research) {
-        //TODO saving individual research
-        //TODO Add some validation
-    }
-
-    //It will build if and only if there is no data occurrence from database
-    private List<Researchers> buildResearchers(String names) {
-        List<Researchers> researcherList = new ArrayList<>();
-        String[] nameArr = names.split(",");
-        for (String name : nameArr) {
-            name = name.trim();
-            Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
-            if (researchers.isPresent())
-                researcherList.add(researchers.get());
-            else
-                researcherList.add(Researchers
-                        .builder()
-                        .name(name)
-                        .build()
-                );// It will build new Researcher in each non-existing researchers
+    public ResearchBatchSaveResponse saveResearch(ResearchDto researchDto) {
+        if (researchRepository.findByResearchFile_TitleIgnoreCase(researchDto.getResearchTitle()).isPresent()) {
+            return new ResearchBatchSaveResponse(researchDto.getResearchTitle(), "Already Exist!");
         }
-        return researcherList;
+
+        Research research = researchMapper.toResearch(researchDto);
+
+        research.setFundingAgencies(research.getFundingAgencies().stream()
+                .map(fundingAgency -> buildFundingAgency(fundingAgency.getAgencyName()))
+                .collect(Collectors.toList()));
+
+        research.setResearchers(research.getResearchers().stream()
+                .map(researchers -> buildResearcher(researchers.getName()))
+                .collect(Collectors.toList()));
+
+        research.setDeliveryUnit(buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
+
+        researchRepository.save(research);
+
+        return new ResearchBatchSaveResponse(research.getResearchFile().getTitle(), "Saved!");
     }
+
 
     //It will build if and only if there is no data occurrence from database
     private DeliveryUnit buildDeliveryUnit(String name) {
@@ -133,6 +129,15 @@ public class ResearchService {
         return fundingAgency.orElse(FundingAgency
                 .builder()
                 .agencyName(agencyName)
+                .build()
+        );
+    }
+
+    private Researchers buildResearcher(String name) {
+        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
+        return researchers.orElse(Researchers
+                .builder()
+                .name(name)
                 .build()
         );
     }

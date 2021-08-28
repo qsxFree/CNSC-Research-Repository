@@ -62,7 +62,7 @@ public class Research {
 
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "delivery_unit", referencedColumnName = "unit_id")
-    private DeliveryUnit deliveryUnitByDeliveryUnit;
+    private DeliveryUnit deliveryUnit;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
