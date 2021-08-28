@@ -1,6 +1,7 @@
 package com.cnsc.research.service;
 
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
+import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
@@ -14,11 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Service
 public class ResearchService {
@@ -30,10 +35,10 @@ public class ResearchService {
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
 
-    @Value("${csv-static-directory}")
-    private String csvStaticDirectory;
+    @Value("${static-directory}")
+    private String staticDirectory;
 
-    private MultipartFile multipartFile;
+    private MultipartFile csvFile;
     private CsvHandler csv;
 
 
@@ -58,13 +63,13 @@ public class ResearchService {
 
 
     private CsvHandler rewriteFileToLocal() throws IOException {
-        File file = new File(csvStaticDirectory + multipartFile.getOriginalFilename());//creating directory
+        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
 
         FileOutputStream fileOutputStream = new FileOutputStream(file);
 
         logger.info("writing file...");
 
-        fileOutputStream.write(multipartFile.getBytes());//rewriting temporary file
+        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
         CsvHandler handler = new CsvHandler(file);
         //TODO add delete function after reading data
         return handler;
@@ -135,9 +140,29 @@ public class ResearchService {
     //TODO add validate status here
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
-        this.multipartFile = file;
+        this.csvFile = file;
         csv = rewriteFileToLocal();
         return researchMapper.csvToResearchDto(csv.getRows(), csv.getRowIndices());
     }
 
+    public String processPdf(String title, MultipartFile pdfFile) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
+        String newName = title.replaceAll(" ", "-");
+        File file = new File(staticDirectory + "pdf/" + newName + ".pdf");
+
+        if (file.exists()) throw new FileAlreadyExistsException(format("%s file already exist", newName));
+        else if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
+            throw new InvalidFileFormat(format("%s is not a pdf file"));
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            logger.info("Saving PDF file ...");
+            fileOutputStream.write(pdfFile.getBytes());
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (IOException e) {
+            logger.info(format("Error in writing pdf file to static directory"));
+            e.printStackTrace();
+        }
+        logger.info("File saved!");
+        return newName;
+    }
 }

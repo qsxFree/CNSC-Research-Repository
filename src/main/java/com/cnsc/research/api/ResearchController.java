@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
+import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.service.ResearchService;
 import com.opencsv.exceptions.CsvException;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 @RestController
@@ -23,13 +26,18 @@ public class ResearchController {
     private final Logger logger;
 
     @Autowired
-    public ResearchController(ResearchService service, Logger logger){
+    public ResearchController(ResearchService service, Logger logger) {
         this.service = service;
         this.logger = logger;
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/upload-csv")
     public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws InvalidCsvFieldException, IOException, CsvException {
         return service.getResearchesFromCsv(file);
+    }
+
+    @PostMapping("/upload-pdf")
+    public String uploadPdf(@RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
+        return service.processPdf(title, file);
     }
 }
