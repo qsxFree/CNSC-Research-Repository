@@ -2,6 +2,7 @@ package com.cnsc.research.api;
 
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
 import com.cnsc.research.domain.exception.InvalidFileFormat;
+import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.service.ResearchService;
@@ -48,4 +49,12 @@ public class ResearchController {
     public List<ResearchBatchSaveResponse> saveResearches(@RequestBody List<ResearchDto> researchDtos) {
         return service.saveResearches(researchDtos);
     }
+
+    @GetMapping("/list")
+    public ResearchBatchQueryResponse getAllResearches(@RequestParam int page,
+                                                       @RequestParam(defaultValue = "20") int size,
+                                                       @RequestParam(defaultValue = "title") String sortBy) {
+        return service.getAllResearches(page, size, sortBy);
+    }
+
 }

@@ -5,6 +5,7 @@ import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
+import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.CsvHandler;
@@ -12,6 +13,10 @@ import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -169,5 +174,21 @@ public class ResearchService {
         }
         logger.info("File saved!");
         return newName;
+    }
+
+    public ResearchBatchQueryResponse getAllResearches(int page, int size, String sortBy) {
+        sortBy = sortBy.equals("title") ? "researchFile.title" : sortBy;
+
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<Research> pageResult = researchRepository.findAll(pageRequest);
+
+        int totalPage = pageResult.getTotalPages();
+        long totalElements = pageResult.getTotalElements();
+        int next = page + 1;
+        int prev = page - 1;
+
+        List<Research> queryResult = pageResult.getContent();
+        ResearchBatchQueryResponse response = new ResearchBatchQueryResponse(researchMapper.toResearchDto(queryResult), next, prev, totalPage, totalElements);
+        return response;
     }
 }
