@@ -50,7 +50,7 @@ public class ResearchMapper {
                 .map(FundingAgency::getAgencyName)
                 .collect(Collectors.toList());
 
-        String deliveryUnit = research.getDeliveryUnitByDeliveryUnit().getUnitName();
+        String deliveryUnit = research.getDeliveryUnit().getUnitName();
         String researchStatus = research.getResearchStatus().name();
         List<String> researchers = research.getResearchers()
                 .stream()
@@ -128,7 +128,7 @@ public class ResearchMapper {
 
         DeliveryUnit unit = new DeliveryUnit();
         unit.setUnitName(researchDto.getDeliveryUnit());
-        research.setDeliveryUnitByDeliveryUnit(unit);
+        research.setDeliveryUnit(unit);
 
         research.setResearchers(researchDto.getResearchers().stream()
                 .map(name -> {

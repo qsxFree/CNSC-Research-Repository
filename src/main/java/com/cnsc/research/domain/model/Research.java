@@ -1,9 +1,6 @@
 package com.cnsc.research.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -62,7 +59,7 @@ public class Research {
 
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "delivery_unit", referencedColumnName = "unit_id")
-    private DeliveryUnit deliveryUnitByDeliveryUnit;
+    private DeliveryUnit deliveryUnit;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
@@ -72,5 +69,11 @@ public class Research {
     )
     private List<Researchers> researchers;
 
+    @Transient
+    @Setter(AccessLevel.NONE)
+    private String researchTitle;
 
+    public String getResearchTitle() {
+        return researchFile.getTitle();
+    }
 }

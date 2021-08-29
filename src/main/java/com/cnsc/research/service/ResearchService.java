@@ -5,12 +5,18 @@ import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.repository.*;
+import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
+import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.CsvHandler;
 import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +28,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -62,56 +69,37 @@ public class ResearchService {
     }
 
 
-    private CsvHandler rewriteFileToLocal() throws IOException {
-        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
 
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
 
-        logger.info("writing file...");
-
-        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
-        CsvHandler handler = new CsvHandler(file);
-        //TODO add delete function after reading data
-        return handler;
+    public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
+        List<ResearchBatchSaveResponse> researchBatchSaveResponses = new ArrayList<>();
+        researchDtos.forEach(researchDto -> researchBatchSaveResponses.add(saveResearch(researchDto)));
+        return researchBatchSaveResponses;
     }
 
-
-    //TODO saving research
-    public void saveResearches(List<String[]> rows) {
-        /*rows.forEach(row -> {
-            Research research = new Research();
-            research.setBudget(Double.valueOf(row[budgetIndex]));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-            research.setStartDate(LocalDate.from(formatter.parse(row[startIndex])));
-            //TODO add research
-        });*/
-    }
-
-    public void saveResearch(Research research) {
-        //TODO saving individual research
-        //TODO Add some validation
-    }
-
-    //It will build if and only if there is no data occurrence from database
-    private List<Researchers> buildResearchers(String names) {
-        List<Researchers> researcherList = new ArrayList<>();
-        String[] nameArr = names.split(",");
-        for (String name : nameArr) {
-            name = name.trim();
-            Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
-            if (researchers.isPresent())
-                researcherList.add(researchers.get());
-            else
-                researcherList.add(Researchers
-                        .builder()
-                        .name(name)
-                        .build()
-                );// It will build new Researcher in each non-existing researchers
+    public ResearchBatchSaveResponse saveResearch(ResearchDto researchDto) {
+        if (researchRepository.findByResearchFile_TitleIgnoreCase(researchDto.getResearchTitle()).isPresent()) {
+            return new ResearchBatchSaveResponse(researchDto.getResearchTitle(), "Already Exist!");
         }
-        return researcherList;
+
+        Research research = researchMapper.toResearch(researchDto);
+
+        research.setFundingAgencies(research.getFundingAgencies().stream()
+                .map(fundingAgency -> buildFundingAgency(fundingAgency.getAgencyName()))
+                .collect(Collectors.toList()));
+
+        research.setResearchers(research.getResearchers().stream()
+                .map(researchers -> buildResearcher(researchers.getName()))
+                .collect(Collectors.toList()));
+
+        research.setDeliveryUnit(buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
+
+        researchRepository.save(research);
+
+        return new ResearchBatchSaveResponse(research.getResearchFile().getTitle(), "Saved!");
     }
 
-    //It will build if and only if there is no data occurrence from database
+
     private DeliveryUnit buildDeliveryUnit(String name) {
         Optional<DeliveryUnit> deliveryUnit = deliveryUnitRepository.findByUnitNameIgnoreCase(name);
         return deliveryUnit.orElse(DeliveryUnit
@@ -127,7 +115,6 @@ public class ResearchService {
                 .build();
     }
 
-    //It will build if and only if there is no data occurrence from database
     private FundingAgency buildFundingAgency(String agencyName) {
         Optional<FundingAgency> fundingAgency = fundingAgencyRepository.findByAgencyNameIgnoreCase(agencyName);
         return fundingAgency.orElse(FundingAgency
@@ -137,7 +124,15 @@ public class ResearchService {
         );
     }
 
-    //TODO add validate status here
+    private Researchers buildResearcher(String name) {
+        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
+        return researchers.orElse(Researchers
+                .builder()
+                .name(name)
+                .build()
+        );
+    }
+
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
         this.csvFile = file;
@@ -145,11 +140,26 @@ public class ResearchService {
         return researchMapper.csvToResearchDto(csv.getRows(), csv.getRowIndices());
     }
 
+    private CsvHandler rewriteFileToLocal() throws IOException {
+        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
+
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+        logger.info("writing file...");
+
+        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
+        CsvHandler handler = new CsvHandler(file);
+        file.delete();
+        return handler;
+    }
+
+
     public String processPdf(String title, MultipartFile pdfFile) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
         String newName = title.replaceAll(" ", "-");
         File file = new File(staticDirectory + "pdf/" + newName + ".pdf");
 
-        if (file.exists()) throw new FileAlreadyExistsException(format("%s file already exist", newName));
+        if (file.exists())
+            throw new FileAlreadyExistsException(format("%s file already exist", newName));
         else if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
             throw new InvalidFileFormat(format("%s is not a pdf file"));
 
@@ -164,5 +174,21 @@ public class ResearchService {
         }
         logger.info("File saved!");
         return newName;
+    }
+
+    public ResearchBatchQueryResponse getAllResearches(int page, int size, String sortBy) {
+        sortBy = sortBy.equals("title") ? "researchFile.title" : sortBy;
+
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<Research> pageResult = researchRepository.findAll(pageRequest);
+
+        int totalPage = pageResult.getTotalPages();
+        long totalElements = pageResult.getTotalElements();
+        int next = page + 1;
+        int prev = page - 1;
+
+        List<Research> queryResult = pageResult.getContent();
+        ResearchBatchQueryResponse response = new ResearchBatchQueryResponse(researchMapper.toResearchDto(queryResult), next, prev, totalPage, totalElements);
+        return response;
     }
 }
