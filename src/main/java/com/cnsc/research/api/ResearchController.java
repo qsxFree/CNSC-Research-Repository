@@ -9,6 +9,7 @@ import com.cnsc.research.service.ResearchService;
 import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +44,16 @@ public class ResearchController {
     @PostMapping
     public ResearchBatchSaveResponse saveResearch(@RequestBody ResearchDto researchDto) {
         return service.saveResearch(researchDto);
+    }
+
+    @PutMapping
+    public ResponseEntity updateResearch(@RequestBody ResearchDto researchDto) {
+        return service.updateResearch(researchDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteResearch(@PathVariable(name = "id") Integer researchId) {
+        return service.deleteResearch(researchId);
     }
 
     @PostMapping("/batch")

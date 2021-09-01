@@ -44,26 +44,38 @@ public class ResearchMapper {
         LocalDate endDate = research.getEndDate();
         String remarks = research.getRemarks();
         String researchTitle = research.getResearchFile().getTitle();
-
-        List<String> fundingAgencies = research.getFundingAgencies()
-                .stream()
-                .map(FundingAgency::getAgencyName)
-                .collect(Collectors.toList());
-
-        String deliveryUnit = research.getDeliveryUnit().getUnitName();
         String researchStatus = research.getResearchStatus().name();
-        List<String> researchers = research.getResearchers()
-                .stream()
-                .map(Researchers::getName)
-                //.distinct()
+
+        List<ResearchDto.FundingAgency> agencies = research.getFundingAgencies().stream()
+                .map(data -> ResearchDto
+                        .FundingAgency
+                        .builder()
+                        .agencyId(data.getAgencyId())
+                        .agencyName(data.getAgencyName()).build())
                 .collect(Collectors.toList());
 
-        String researchFile = research.getResearchFile().getFileName();
+        ResearchDto.DeliveryUnit deliveryUnit = ResearchDto.DeliveryUnit.builder()
+                .unitId(research.getDeliveryUnit().getUnitId())
+                .unitName(research.getDeliveryUnit().getUnitName())
+                .build();
+
+        List<ResearchDto.Researchers> researchers = research.getResearchers().stream()
+                .map(data -> ResearchDto
+                        .Researchers
+                        .builder()
+                        .researcherId(data.getResearcherId())
+                        .name(data.getName()).build())
+                .collect(Collectors.toList());
+
+        ResearchDto.ResearchFile researchFile = ResearchDto.ResearchFile.builder()
+                .fileId(research.getResearchFile().getFileId())
+                .title(research.getResearchFile().getTitle())
+                .fileName(research.getResearchFile().getFileName())
+                .build();
 
         return new ResearchDto(
                 id,
-                researchTitle,
-                fundingAgencies,
+                agencies,
                 budget,
                 startDate,
                 endDate,
@@ -102,17 +114,8 @@ public class ResearchMapper {
         research.setStartDate(researchDto.getStartDate());
         research.setEndDate(researchDto.getEndDate());
         research.setRemarks(researchDto.getRemarks());
-        research.setDeleted((byte) 0);
+        research.setDeleted(false);
 
-
-        research.setFundingAgencies(researchDto.getFundingAgency().stream()
-                .map(name -> {
-                    FundingAgency agency = new FundingAgency();
-                    agency.setAgencyName(name);
-                    return agency;
-                })
-                .collect(Collectors.toList())
-        );
 
         switch (researchDto.getResearchStatus().toLowerCase()) {
             case "new":
@@ -126,23 +129,38 @@ public class ResearchMapper {
                 break;
         }
 
-        DeliveryUnit unit = new DeliveryUnit();
-        unit.setUnitName(researchDto.getDeliveryUnit());
-        research.setDeliveryUnit(unit);
-
-        research.setResearchers(researchDto.getResearchers().stream()
-                .map(name -> {
-                    Researchers researcher = new Researchers();
-                    researcher.setName(name);
-                    return researcher;
-                })
+        research.setFundingAgencies(researchDto.getFundingAgency()
+                .stream()
+                .map(data ->
+                        FundingAgency.builder()
+                                .agencyId(data.getAgencyId())
+                                .agencyName(data.getAgencyName())
+                                .build())
                 .collect(Collectors.toList())
         );
 
-        ResearchFile researchFile = new ResearchFile();
-        researchFile.setTitle(researchDto.getResearchTitle());
-        researchFile.setFileName(researchDto.getResearchFile());
-        research.setResearchFile(researchFile);
+        research.setDeliveryUnit(DeliveryUnit.builder()
+                .unitId(researchDto.getDeliveryUnit().getUnitId())
+                .unitName(researchDto.getDeliveryUnit().getUnitName())
+                .build());
+
+        research.setResearchers(researchDto.getResearchers()
+                .stream()
+                .map(data ->
+                        Researchers.builder()
+                                .researcherId(data.getResearcherId())
+                                .name(data.getName())
+                                .build())
+                .collect(Collectors.toList())
+        );
+        research.setResearchFile(researchDto.getResearchFile() != null //if researchFile is not null
+                ? ResearchFile.builder()
+                .fileId(researchDto.getResearchFile().getFileId())
+                .fileName(researchDto.getResearchFile().getFileName())
+                .title(researchDto.getResearchFile().getTitle())
+                .build()
+                : ResearchFile.builder().title(researchDto.getResearchFile().getTitle()).build()
+        );
 
         return research;
     }
@@ -184,28 +202,34 @@ public class ResearchMapper {
         String[] researchers = csvRow[indices.get("RESEARCHERS")].split(",");
         String[] fundingAgency = csvRow[indices.get("FUNDING_AGENCY")].split(",");
 
-        List<String> researcherList = Arrays.stream(researchers)
-                .map(String::trim)
-                //.distinct()
+        List<ResearchDto.Researchers> researcherList = Arrays.stream(researchers)
+                .map(data ->
+                        ResearchDto.Researchers.builder()
+                                .name(data.trim())
+                                .build()
+                )
                 .collect(Collectors.toList());
 
-        List<String> fundingAgencies = Arrays.stream(fundingAgency)
-                .map(String::trim)
-                //.distinct()
+        List<ResearchDto.FundingAgency> fundingAgencies = Arrays.stream(fundingAgency)
+                .map(data ->
+                        ResearchDto.FundingAgency.builder()
+                                .agencyName(data)
+                                .build()
+                )
                 .collect(Collectors.toList());
+
 
         return new ResearchDto(
                 null,
-                csvRow[indices.get("TITLE")],
                 fundingAgencies,
                 Double.valueOf(csvRow[indices.get("BUDGET")]),
                 LocalDate.from(formatter.parse(csvRow[indices.get("START_DATE")])),
                 LocalDate.from(formatter.parse(csvRow[indices.get("END_DATE")])),
                 csvRow[indices.get("STATUS")],
-                csvRow[indices.get("DELIVERY_UNIT")],
+                ResearchDto.DeliveryUnit.builder().unitName(csvRow[indices.get("DELIVERY_UNIT")]).build(),
                 csvRow[indices.get("REMARK")],
                 researcherList,
-                null // this is null because it cannot include the pdf file when it is uploaded
+                ResearchDto.ResearchFile.builder().title(csvRow[indices.get("TITLE")]).build()
         );
 
     }
