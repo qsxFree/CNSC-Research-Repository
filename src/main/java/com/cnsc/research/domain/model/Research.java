@@ -1,6 +1,9 @@
 package com.cnsc.research.domain.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -31,9 +34,8 @@ public class Research {
     @Column(name = "remarks", length = 300)
     private String remarks;
 
-    @Transient
     @Column(name = "deleted")
-    private Byte deleted;
+    private boolean deleted;
 
     @Column(name = "datetime_deleted")
     private LocalDateTime datetimeDeleted;
@@ -69,11 +71,4 @@ public class Research {
     )
     private List<Researchers> researchers;
 
-    @Transient
-    @Setter(AccessLevel.NONE)
-    private String researchTitle;
-
-    public String getResearchTitle() {
-        return researchFile.getTitle();
-    }
 }
