@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +55,7 @@ public class ResearchService {
 
     private MultipartFile csvFile;
     private CsvHandler csv;
+    private UserDetails currentUser;
 
 
     @Autowired
@@ -170,19 +172,23 @@ public class ResearchService {
         return handler;
     }
 
+    private File getPdfFile(String fileName) {
+        String newName = fileName.replaceAll(" ", "-");
+        newName = newName.replaceAll("[./\\:?*\"|]", "");
+        return new File(staticDirectory + "pdf\\" + newName + ".pdf");
+    }
 
-    public String processPdf(String title, MultipartFile pdfFile) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
-        String newName = title.replaceAll(" ", "-");
-        File file = new File(staticDirectory + "pdf/" + newName + ".pdf");
-
-        if (file.exists())
-            throw new FileAlreadyExistsException(format("%s file already exist", newName));
-        else if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
+    //TODO find a solution for pdf caching to avoid duplicates on upload
+    public String processPdf(Integer id, String title, MultipartFile pdfFile) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
+        //currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        File file = getPdfFile(title);
+        if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
             throw new InvalidFileFormat(format("%s is not a pdf file"));
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             logger.info("Saving PDF file ...");
             fileOutputStream.write(pdfFile.getBytes());
+
         } catch (FileNotFoundException e) {
             throw e;
         } catch (IOException e) {
@@ -190,7 +196,7 @@ public class ResearchService {
             e.printStackTrace();
         }
         logger.info("File saved!");
-        return newName;
+        return file.getName().replace(".pdf", "");
     }
 
     public ResearchBatchQueryResponse getAllResearches(int page, int size, String sortBy) {
@@ -236,5 +242,19 @@ public class ResearchService {
             response = new ResponseEntity("Delete Error!", INTERNAL_SERVER_ERROR);
         }
         return response;
+    }
+
+    public String deletePdf(String title) {
+        File file = getPdfFile(title);
+        String fileName = file.getName().replace(".pdf", "");
+        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
+        if (file.exists()) file.delete();
+        else return "There is nothing to delete.";
+        if (researchFile.isPresent()) {
+            researchFile.get().setFileName(null);
+            researchFileRepository.save(researchFile.get());
+            logger.info(format("%s.pdf has been removed", fileName));
+        } else return format("%s is not linked to any records");
+        return format("%s file has been removed", fileName);
     }
 }

@@ -36,9 +36,14 @@ public class ResearchController {
         return service.getResearchesFromCsv(file);
     }
 
-    @PostMapping("/upload-pdf")
-    public String uploadPdf(@RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
-        return service.processPdf(title, file);
+    @PostMapping("/pdf")
+    public String uploadPdf(@RequestParam(name = "id", defaultValue = "0") Integer id, @RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
+        return service.processPdf(id, title, file);
+    }
+
+    @DeleteMapping("/pdf")
+    public String deletePdf(@RequestParam("title") String title) {
+        return service.deletePdf(title);
     }
 
     @PostMapping
@@ -63,9 +68,9 @@ public class ResearchController {
 
     @GetMapping("/list")
     public ResearchBatchQueryResponse getAllResearches(@RequestParam int page,
-                                                       @RequestParam(defaultValue = "20") int size,
+                                                       @RequestParam(defaultValue = "max") String size,
                                                        @RequestParam(defaultValue = "title") String sortBy) {
-        return service.getAllResearches(page, size, sortBy);
+        return service.getAllResearches(page, size.equals("max") ? Integer.MAX_VALUE : Integer.valueOf(size), sortBy);
     }
 
 }
