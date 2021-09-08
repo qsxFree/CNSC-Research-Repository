@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -170,19 +169,23 @@ public class ResearchService {
         return handler;
     }
 
+    private File getPdfFile(String fileName) {
+        String newName = fileName.replaceAll(" ", "-");
+        newName = newName.replaceAll("[./\\:?*\"|]", "");
+        return new File(staticDirectory + "pdf\\" + newName + ".pdf");
+    }
 
-    public String processPdf(String title, MultipartFile pdfFile) throws FileAlreadyExistsException, FileNotFoundException, InvalidFileFormat {
-        String newName = title.replaceAll(" ", "-");
-        File file = new File(staticDirectory + "pdf/" + newName + ".pdf");
-
-        if (file.exists())
-            throw new FileAlreadyExistsException(format("%s file already exist", newName));
-        else if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
+    public String processPdf(String title, MultipartFile pdfFile) throws FileNotFoundException, InvalidFileFormat {
+        File file = getPdfFile(title);
+        logger.info(pdfFile.getOriginalFilename());
+        logger.info(file.getName());
+        if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
             throw new InvalidFileFormat(format("%s is not a pdf file"));
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             logger.info("Saving PDF file ...");
             fileOutputStream.write(pdfFile.getBytes());
+
         } catch (FileNotFoundException e) {
             throw e;
         } catch (IOException e) {
@@ -190,7 +193,7 @@ public class ResearchService {
             e.printStackTrace();
         }
         logger.info("File saved!");
-        return newName;
+        return file.getName().replace(".pdf", "");
     }
 
     public ResearchBatchQueryResponse getAllResearches(int page, int size, String sortBy) {
@@ -236,5 +239,19 @@ public class ResearchService {
             response = new ResponseEntity("Delete Error!", INTERNAL_SERVER_ERROR);
         }
         return response;
+    }
+
+    public String deletePdf(String title) {
+        File file = getPdfFile(title);
+        String fileName = file.getName().replace(".pdf", "");
+        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
+        if (file.exists()) file.delete();
+        else return "There is nothing to delete.";
+        if (researchFile.isPresent()) {
+            researchFile.get().setFileName(null);
+            researchFileRepository.save(researchFile.get());
+            logger.info(format("%s.pdf has been removed", fileName));
+        } else return format("%s is not linked to any records");
+        return format("%s file has been removed", fileName);
     }
 }
