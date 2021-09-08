@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 @RestController
@@ -36,8 +37,8 @@ public class ResearchController {
     }
 
     @PostMapping("/pdf")
-    public String uploadPdf(@RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileNotFoundException, InvalidFileFormat {
-        return service.processPdf(title, file);
+    public String uploadPdf(@RequestParam(name = "id", defaultValue = "0") Integer id, @RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
+        return service.processPdf(id, title, file);
     }
 
     @DeleteMapping("/pdf")

@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ public class ResearchService {
 
     private MultipartFile csvFile;
     private CsvHandler csv;
+    private UserDetails currentUser;
 
 
     @Autowired
@@ -175,10 +178,10 @@ public class ResearchService {
         return new File(staticDirectory + "pdf\\" + newName + ".pdf");
     }
 
-    public String processPdf(String title, MultipartFile pdfFile) throws FileNotFoundException, InvalidFileFormat {
+    //TODO find a solution for pdf caching to avoid duplicates on upload
+    public String processPdf(Integer id, String title, MultipartFile pdfFile) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
+        //currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         File file = getPdfFile(title);
-        logger.info(pdfFile.getOriginalFilename());
-        logger.info(file.getName());
         if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
             throw new InvalidFileFormat(format("%s is not a pdf file"));
 
