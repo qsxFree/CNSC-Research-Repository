@@ -32,8 +32,17 @@ public class ResearchController {
     }
 
     @PostMapping("/upload-csv")
-    public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws InvalidCsvFieldException, IOException, CsvException {
-        return service.getResearchesFromCsv(file);
+    public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws Exception {
+        try {
+            return service.getResearchesFromCsv(file);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        } catch (InvalidCsvFieldException e) {
+            throw new Exception(e.getMessage());
+        } catch (CsvException e) {
+            throw new Exception(e.getMessage());
+        }
+
     }
 
     @PostMapping("/pdf")
@@ -59,6 +68,11 @@ public class ResearchController {
     @DeleteMapping("/{id}")
     public ResponseEntity deleteResearch(@PathVariable(name = "id") Integer researchId) {
         return service.deleteResearch(researchId);
+    }
+
+    @GetMapping("/{id}")
+    public ResearchDto getResearch(@PathVariable(name = "id") Integer researchId) throws Exception {
+        return service.getResearch(researchId);
     }
 
     @PostMapping("/batch")
