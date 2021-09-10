@@ -257,4 +257,10 @@ public class ResearchService {
         } else return format("%s is not linked to any records");
         return format("%s file has been removed", fileName);
     }
+
+    public ResearchDto getResearch(Integer researchId) throws Exception {
+        Optional<Research> research = researchRepository.findById(researchId);
+        if (research.isPresent()) return researchMapper.toResearchDto(research.get());
+        else throw new Exception("The research didn't exist");
+    }
 }
