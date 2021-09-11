@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -262,5 +263,21 @@ public class ResearchService {
         Optional<Research> research = researchRepository.findById(researchId);
         if (research.isPresent()) return researchMapper.toResearchDto(research.get());
         else throw new Exception("The research didn't exist");
+    }
+
+    public ResponseEntity deleteResearches(List<Integer> ids) {
+        AtomicInteger deletedCount = new AtomicInteger(0);
+        ids.forEach((researchId) -> {
+            try {
+                Research research = researchRepository.findById(researchId).get();
+                research.setDeleted(true);
+                research.setDatetimeDeleted(LocalDateTime.now());
+                researchRepository.save(research);
+                deletedCount.getAndIncrement();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return new ResponseEntity(format("%d items has been deleted", deletedCount.get()), OK);
     }
 }
