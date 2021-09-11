@@ -80,6 +80,11 @@ public class ResearchController {
         return service.saveResearches(researchDtos);
     }
 
+    @DeleteMapping("/batch")
+    public ResponseEntity deleteBatch(@RequestBody List<Integer> ids) {
+        return service.deleteResearches(ids);
+    }
+
     @GetMapping("/list")
     public ResearchBatchQueryResponse getAllResearches(@RequestParam int page,
                                                        @RequestParam(defaultValue = "max") String size,
