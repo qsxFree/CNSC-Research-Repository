@@ -176,7 +176,7 @@ public class ResearchService {
     private File getPdfFile(String fileName) {
         String newName = fileName.replaceAll(" ", "-");
         newName = newName.replaceAll("[./\\:?*\"|]", "");
-        return new File(staticDirectory + "pdf\\" + newName + ".pdf");
+        return new File(staticDirectory + "pdf/" + newName + ".pdf");
     }
 
     //TODO find a solution for pdf caching to avoid duplicates on upload
