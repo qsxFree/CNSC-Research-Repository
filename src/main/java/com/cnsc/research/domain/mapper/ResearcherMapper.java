@@ -18,4 +18,18 @@ public class ResearcherMapper {
                 .map(ResearcherMapper::toResearcherDto)
                 .collect(Collectors.toList());
     }
+
+    public static Researchers toResearcher(ResearchersDto researchersDto){
+        Researchers researchers = Researchers.builder()
+                .researcherId(researchersDto.getResearcherId())
+                .name(researchersDto.getResearcherName())
+                .build();
+        return researchers;
+    }
+
+    public static List<Researchers> toResearcher(Collection<ResearchersDto> researchersDtos){
+        return researchersDtos.stream()
+                .map(ResearcherMapper::toResearcher)
+                .collect(Collectors.toList());
+    }
 }
