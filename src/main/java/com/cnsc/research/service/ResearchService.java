@@ -9,6 +9,7 @@ import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.CsvHandler;
+import com.cnsc.research.misc.EntityBuilders;
 import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,10 @@ import static org.springframework.http.HttpStatus.OK;
 @Service
 public class ResearchService {
     private final Logger logger;
-    private final DeliveryUnitRepository deliveryUnitRepository;
-    private final FundingAgencyRepository fundingAgencyRepository;
-    private final ResearchersRepository researchersRepository;
     private final ResearchFileRepository researchFileRepository;
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
-    private final DateTimeFormatter formatter;
-
+    private final EntityBuilders entityBuilder;
 
     @Value("${static-directory}")
     private String staticDirectory;
@@ -61,27 +58,17 @@ public class ResearchService {
 
     @Autowired
     public ResearchService(Logger logger,
-                           DeliveryUnitRepository deliveryUnitRepository,
-                           FundingAgencyRepository fundingAgencyRepository,
-                           ResearchersRepository researchersRepository,
                            ResearchFileRepository researchFileRepository,
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
-                           DateTimeFormatter formatter
+                           EntityBuilders entityBuilder
     ) {
-
+        this.entityBuilder = entityBuilder;
         this.logger = logger;
-        this.deliveryUnitRepository = deliveryUnitRepository;
-        this.fundingAgencyRepository = fundingAgencyRepository;
-        this.researchersRepository = researchersRepository;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
         this.researchMapper = researchMapper;
-        this.formatter = formatter;
     }
-
-
-
 
     public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
         List<ResearchBatchSaveResponse> researchBatchSaveResponses = new ArrayList<>();
@@ -102,55 +89,19 @@ public class ResearchService {
     }
 
     private Research validateRelationships(Research research) {
-        research.setResearchFile(buildResearchFile(research.getResearchFile().getTitle(), research.getResearchFile().getFileName()));
+        research.setResearchFile(entityBuilder.buildResearchFile(research.getResearchFile().getTitle(), research.getResearchFile().getFileName()));
 
         research.setFundingAgencies(research.getFundingAgencies().stream()
-                .map(fundingAgency -> buildFundingAgency(fundingAgency.getAgencyName()))
+                .map(fundingAgency -> entityBuilder.buildFundingAgency(fundingAgency.getAgencyName()))
                 .collect(Collectors.toList()));
 
         research.setResearchers(research.getResearchers().stream()
-                .map(researchers -> buildResearcher(researchers.getName()))
+                .map(researchers -> entityBuilder.buildResearcher(researchers.getName()))
                 .collect(Collectors.toList()));
 
-        research.setDeliveryUnit(buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
+        research.setDeliveryUnit(entityBuilder.buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
 
         return research;
-    }
-
-
-    private DeliveryUnit buildDeliveryUnit(String name) {
-        Optional<DeliveryUnit> deliveryUnit = deliveryUnitRepository.findByUnitNameIgnoreCase(name);
-        return deliveryUnit.orElse(DeliveryUnit
-                .builder()
-                .unitName(name)
-                .build());
-    }
-
-    private ResearchFile buildResearchFile(String title, String fileName) {
-        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
-        return researchFile.orElse(ResearchFile
-                .builder()
-                .title(title)
-                .fileName(fileName)
-                .build());
-    }
-
-    private FundingAgency buildFundingAgency(String agencyName) {
-        Optional<FundingAgency> fundingAgency = fundingAgencyRepository.findByAgencyNameIgnoreCase(agencyName);
-        return fundingAgency.orElse(FundingAgency
-                .builder()
-                .agencyName(agencyName)
-                .build()
-        );
-    }
-
-    private Researchers buildResearcher(String name) {
-        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
-        return researchers.orElse(Researchers
-                .builder()
-                .name(name)
-                .build()
-        );
     }
 
 
