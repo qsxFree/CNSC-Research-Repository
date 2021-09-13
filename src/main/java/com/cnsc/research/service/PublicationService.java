@@ -13,16 +13,23 @@ import org.springframework.stereotype.Service;
 public class PublicationService {
     private final PublicationRepository repository;
     private final Logger logger;
+    private final PublicationMapper publicationMapper;
+    private final ResearcherMapper researcherMapper;
 
     @Autowired
-    public PublicationService(PublicationRepository repository, Logger logger) {
+    public PublicationService(PublicationRepository repository,
+                              PublicationMapper publicationMapper,
+                              Logger logger,
+                              ResearcherMapper researcherMapper) {
         this.repository = repository;
         this.logger = logger;
+        this.publicationMapper = publicationMapper;
+        this.researcherMapper = researcherMapper;
     }
 
     public String addPublication(ExtendedPublicationDto publicationDto){
-        Publication publication = PublicationMapper.toPublication(publicationDto);
-        publication.setResearchers(ResearcherMapper.toResearcher(publicationDto.getResearchers()));
+        Publication publication = publicationMapper.toPublication(publicationDto);
+        publication.setResearchers(researcherMapper.toResearcher(publicationDto.getResearchers()));
         try{
             repository.save(publication);
             return "New Record has been added";

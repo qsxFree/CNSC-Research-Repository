@@ -12,15 +12,17 @@ import java.util.List;
 @Service
 public class ResearcherService {
     private final ResearchersRepository repository;
+    private final ResearcherMapper mapper;
     private final Logger logger;
 
     @Autowired
-    public ResearcherService(ResearchersRepository repository, Logger logger) {
+    public ResearcherService(ResearchersRepository repository,ResearcherMapper mapper , Logger logger) {
         this.repository = repository;
         this.logger = logger;
+        this.mapper = mapper;
     }
 
     public List<ResearchersDto> getAllResearchers() {
-        return ResearcherMapper.toResearchDto(repository.findAll());
+        return mapper.toResearchDto(repository.findAll());
     }
 }
