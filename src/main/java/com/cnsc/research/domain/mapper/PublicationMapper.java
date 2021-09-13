@@ -47,6 +47,7 @@ public class PublicationMapper {
                 .publicationId(publicationDto.getPublicationId())
                 .publicationTitle(publicationDto.getPublicationTitle())
                 .publicationLink(publicationDto.getPublicationLink())
+                .researchers(researcherMapper.toResearcher(publicationDto.getResearchers()))
                 .build();
     }
 

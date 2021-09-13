@@ -31,7 +31,7 @@ public class Publication {
     @Column(name = "datetime_added")
     private LocalDateTime dateTimeAdded;
 
-    @Column(name = "datetime_deleted")
+    @Column(name = "datetime_removed")
     private LocalDateTime dateTimeDeleted;
 
     private boolean deleted;
