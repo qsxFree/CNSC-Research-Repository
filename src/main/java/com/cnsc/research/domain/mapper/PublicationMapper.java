@@ -32,8 +32,11 @@ public class PublicationMapper {
     }
 
     public  ExtendedPublicationDto toExtendedPublicationDto(Publication publication){
-        ExtendedPublicationDto extendedPublicationDto = (ExtendedPublicationDto) toPublicationDto(publication);
-        extendedPublicationDto.setResearchers(researcherMapper.toResearchDto(publication.getResearchers()));
+        ExtendedPublicationDto extendedPublicationDto = new ExtendedPublicationDto(publication.getPublicationId(),
+                publication.getPublicationTitle(),
+                publication.getPublicationLink(),
+                researcherMapper.toResearchDto(publication.getResearchers())
+        );
         return extendedPublicationDto;
     }
 
