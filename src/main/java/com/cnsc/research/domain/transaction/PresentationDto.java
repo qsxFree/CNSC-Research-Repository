@@ -14,7 +14,10 @@ import java.util.List;
 @Builder
 public class PresentationDto {
     private Long presentationId;
-    private ResearchDto research;
+    private String presentationTitle;
     private String presentationType;
+    private List<String> researchers;
     private LocalDate presentationDate;
+
+
 }

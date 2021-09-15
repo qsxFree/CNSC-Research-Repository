@@ -2,7 +2,9 @@ package com.cnsc.research.domain.mapper;
 
 import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
+import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.transaction.PresentationDto;
+import com.cnsc.research.misc.EntityBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,17 +19,26 @@ import static com.cnsc.research.domain.model.PresentationType.INTERNATIONAL;
 public class PresentationMapper {
 
     private final ResearchMapper researchMapper;
+    private final EntityBuilders entityBuilders;
 
     @Autowired
-    public PresentationMapper(ResearchMapper researchMapper) {
+    public PresentationMapper(ResearchMapper researchMapper, EntityBuilders entityBuilders) {
         this.researchMapper = researchMapper;
+        this.entityBuilders = entityBuilders;
     }
 
     public PresentationDto toPresentationDto(Presentation presentation) {
         return PresentationDto.builder()
                 .presentationId(presentation.getPresentationId())
                 .presentationDate(presentation.getPresentationDate())
-                .research(researchMapper.toResearchDto(presentation.getResearch()))
+                .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
+                .researchers(presentation
+                        .getResearch()
+                        .getResearchers()
+                        .stream()
+                        .map(Researchers::getName)
+                        .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -38,7 +49,7 @@ public class PresentationMapper {
     }
 
 
-    public Presentation toPresentation(PresentationDto presentationDto) {
+    public Presentation toPresentation(PresentationDto presentationDto) throws Exception {
         PresentationType type = null;
         switch (presentationDto.getPresentationType().toLowerCase()) {
             case "local":
@@ -59,7 +70,7 @@ public class PresentationMapper {
                 .presentationId(presentationDto.getPresentationId())
                 .type(type)
                 .presentationDate(presentationDto.getPresentationDate())
-                .research(researchMapper.toResearch(presentationDto.getResearch()))
+                .research(entityBuilders.buildResearchFromDb(presentationDto.getPresentationTitle()))
                 .build();
     }
 }
