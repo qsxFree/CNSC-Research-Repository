@@ -11,7 +11,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PresentationService {
@@ -40,11 +43,64 @@ public class PresentationService {
         Presentation presentation = mapper.toPresentation(presentationDto);
         String researchTitle = presentation.getResearch().getResearchFile().getTitle();
         PresentationType type = presentation.getType();
-        if (repository.existByTitleAndType(researchTitle,type))
-            return new PresentationSaveResponse(researchTitle,"Already Exist!");
-        else{
+        if (repository.existByTitleAndType(researchTitle, type))
+            return new PresentationSaveResponse(researchTitle, "Already Exist!");
+        else {
             repository.save(presentation);
-            return new PresentationSaveResponse(researchTitle,"Saved!");
+            return new PresentationSaveResponse(researchTitle, "Saved!");
         }
+    }
+
+    public String deletePresentation(Long presentationId) {
+        String deleteMessage;
+        Optional<Presentation> presentationOptional = repository.findById(presentationId);
+        if (presentationOptional.isPresent()) {
+            try {
+                Presentation presentation = presentationOptional.get();
+                if (!presentation.isDeleted()) {
+                    presentation.setDeleted(true);
+                    presentation.setDateTimeDeleted(LocalDateTime.now());
+                    repository.save(presentation);
+                }
+                deleteMessage = "Presentation has been deleted";
+            } catch (Exception e) {
+                deleteMessage = e.getMessage();
+            }
+        } else deleteMessage = "Presentation ID:" + presentationId + " didn't exist";
+
+        return deleteMessage;
+    }
+
+    public List<PresentationDto> getPresentations() {
+        return mapper.toPresentationDto(repository.findByDeletedIs(false));
+    }
+
+    public String editPresentation(PresentationDto presentationDto) {
+        try {
+            Presentation presentation = mapper.toPresentation(presentationDto);
+            repository.save(presentation);
+            return "Publication saved";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    public List<String> deletePresentations(List<Long> idList) {
+        return idList.stream()
+                .map(this::deletePresentation)
+                .collect(Collectors.toList());
+    }
+
+    public List<PresentationSaveResponse> savePresentations(List<PresentationDto> presentationDtos) {
+        return presentationDtos.stream()
+                .map(item -> {
+                    try {
+                        return addPresentation(item);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return new PresentationSaveResponse(item.getPresentationTitle(), "Didn't saved");
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

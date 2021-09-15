@@ -18,12 +18,10 @@ import static com.cnsc.research.domain.model.PresentationType.INTERNATIONAL;
 @Component
 public class PresentationMapper {
 
-    private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilders;
 
     @Autowired
-    public PresentationMapper(ResearchMapper researchMapper, EntityBuilders entityBuilders) {
-        this.researchMapper = researchMapper;
+    public PresentationMapper( EntityBuilders entityBuilders) {
         this.entityBuilders = entityBuilders;
     }
 
@@ -31,6 +29,7 @@ public class PresentationMapper {
         return PresentationDto.builder()
                 .presentationId(presentation.getPresentationId())
                 .presentationDate(presentation.getPresentationDate())
+                .presentationType(presentation.getType().name().toLowerCase())
                 .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
                 .researchers(presentation
                         .getResearch()
@@ -72,5 +71,19 @@ public class PresentationMapper {
                 .presentationDate(presentationDto.getPresentationDate())
                 .research(entityBuilders.buildResearchFromDb(presentationDto.getPresentationTitle()))
                 .build();
+    }
+
+    public List<Presentation> toPresentation(Collection<PresentationDto> presentationDtos){
+        return presentationDtos
+                .stream()
+                .map(item -> {
+                    try {
+                        return toPresentation(item);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

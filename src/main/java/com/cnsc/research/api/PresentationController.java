@@ -5,8 +5,9 @@ import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.service.PresentationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/presentation")
@@ -32,7 +33,32 @@ public class PresentationController {
             return service.addPresentation(presentationDto);
         } catch (Exception e) {
             e.printStackTrace();
-            return new PresentationSaveResponse("","An err has occured. Error - " + e.getMessage());
+            return new PresentationSaveResponse("","An error has occured. Error - " + e.getMessage());
         }
+    }
+
+    @PutMapping
+    public String editPresentation(@RequestBody PresentationDto presentationDto){
+        return service.editPresentation(presentationDto);
+    }
+
+    @DeleteMapping
+    public String deletePresentation(@RequestBody Long presentationId){
+        return service.deletePresentation(presentationId);
+    }
+
+    @PostMapping("/list")
+    public List<PresentationSaveResponse> saveBatch(@RequestBody List<PresentationDto> presentationDtos){
+        return service.savePresentations(presentationDtos);
+    }
+
+    @GetMapping("/list")
+    public List<PresentationDto> getPresentations(){
+        return service.getPresentations();
+    }
+
+    @DeleteMapping("/list")
+    public List<String> deletePublications(@RequestBody List<Long> idList){
+        return service.deletePresentations(idList);
     }
 }
