@@ -6,11 +6,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 public class ResearcherMapper {
-    
+
     public  ResearchersDto toResearcherDto(Researchers researcher){
         return new ResearchersDto(researcher.getResearcherId(),researcher.getName());
     }

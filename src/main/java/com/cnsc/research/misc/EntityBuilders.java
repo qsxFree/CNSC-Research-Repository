@@ -1,13 +1,7 @@
 package com.cnsc.research.misc;
 
-import com.cnsc.research.domain.model.DeliveryUnit;
-import com.cnsc.research.domain.model.FundingAgency;
-import com.cnsc.research.domain.model.ResearchFile;
-import com.cnsc.research.domain.model.Researchers;
-import com.cnsc.research.domain.repository.DeliveryUnitRepository;
-import com.cnsc.research.domain.repository.FundingAgencyRepository;
-import com.cnsc.research.domain.repository.ResearchFileRepository;
-import com.cnsc.research.domain.repository.ResearchersRepository;
+import com.cnsc.research.domain.model.*;
+import com.cnsc.research.domain.repository.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +20,7 @@ public class EntityBuilders {
     private final ResearchersRepository researchersRepository;
     private final DeliveryUnitRepository deliveryUnitRepository;
     private final ResearchFileRepository researchFileRepository;
+    private final ResearchRepository researchRepository;
     private final Logger logger;
 
     @Autowired
@@ -33,11 +28,12 @@ public class EntityBuilders {
                           ResearchersRepository researchersRepository,
                           DeliveryUnitRepository deliveryUnitRepository,
                           ResearchFileRepository researchFileRepository,
-                          Logger logger) {
+                          ResearchRepository researchRepository, Logger logger) {
         this.fundingAgencyRepository = fundingAgencyRepository;
         this.researchersRepository = researchersRepository;
         this.deliveryUnitRepository = deliveryUnitRepository;
         this.researchFileRepository = researchFileRepository;
+        this.researchRepository = researchRepository;
         this.logger = logger;
     }
 
@@ -102,6 +98,19 @@ public class EntityBuilders {
                 .title(title)
                 .fileName(fileName)
                 .build());
+    }
+
+    /**
+     * Creates a research instance from the database.
+     * This is different from other entity builders because it
+     * only returns the data that exist in the database
+     * @param title - title of the the research.
+     * @return Research
+     * @throws Exception - throws an error if the data didn't exist.or the data is flagged deleted
+     * */
+    public Research buildResearchFromDb(String title) throws Exception {
+        Optional<Research> research = researchRepository.findResearchByTitle(title);
+        return research.orElseThrow(()->new Exception(String.format("cannot find %s ",title)));
     }
 
 }
