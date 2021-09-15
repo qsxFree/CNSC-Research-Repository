@@ -13,14 +13,16 @@ import java.util.List;
 public class ResearcherService {
     private final ResearchersRepository repository;
     private final Logger logger;
+    private final ResearcherMapper researcherMapper;
 
     @Autowired
-    public ResearcherService(ResearchersRepository repository, Logger logger) {
+    public ResearcherService(ResearchersRepository repository, Logger logger, ResearcherMapper researcherMapper) {
         this.repository = repository;
         this.logger = logger;
+        this.researcherMapper = researcherMapper;
     }
 
     public List<ResearchersDto> getAllResearchers() {
-        return ResearcherMapper.toResearchDto(repository.findAll());
+        return researcherMapper.toResearchDto(repository.findAll());
     }
 }
