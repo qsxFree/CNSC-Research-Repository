@@ -10,14 +10,17 @@ import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.misc.EntityBuilders;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 public class PublicationService {
@@ -62,8 +65,8 @@ public class PublicationService {
         }
     }
 
-    public PublicationDto getPublication(Long publicationId) {
-        return publicationMapper.toPublicationDto(repository.getById(publicationId));
+    public ExtendedPublicationDto getPublication(Long publicationId) {
+        return publicationMapper.toExtendedPublicationDto(repository.getById(publicationId));
     }
 
     public String editPublication(PublicationDto publicationDto) {
@@ -111,9 +114,13 @@ public class PublicationService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> deletePublications(List<Long> idList) {
-        return idList.stream()
-                .map(this::deletePublication)
-                .collect(Collectors.toList());
+    public ResponseEntity deletePublications(List<Long> idList) {
+        AtomicInteger deleteCount = new AtomicInteger(0);
+        idList.forEach((id) -> {
+            //FIXME This is not safe validation. This might change someday
+            if (this.deletePublication(id).equals("Publication has been deleted"))
+                deleteCount.getAndIncrement();
+        });
+        return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
     }
 }

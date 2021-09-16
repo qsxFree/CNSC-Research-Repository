@@ -77,7 +77,7 @@ public class ResearchService {
     }
 
     public ResearchBatchSaveResponse saveResearch(ResearchDto researchDto) {
-        if (researchRepository.findByResearchFile_TitleIgnoreCase(researchDto.getResearchFile().getTitle()).isPresent()) {
+        if (researchRepository.findResearchByTitle(researchDto.getResearchFile().getTitle()).isPresent()) {
             return new ResearchBatchSaveResponse(researchDto.getResearchFile().getTitle(), "Already Exist!");
         }
 

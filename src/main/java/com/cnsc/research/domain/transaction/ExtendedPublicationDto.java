@@ -13,7 +13,7 @@ public class ExtendedPublicationDto extends PublicationDto {
     private List<ResearchersDto> researchers;
 
     public ExtendedPublicationDto(Long publicationId,String publicationTitle,String publicationLink,List<ResearchersDto> researchers){
-        super(publicationId,publicationTitle,publicationTitle);
+        super(publicationId,publicationTitle,publicationLink);
         this.researchers = researchers;
     }
 }

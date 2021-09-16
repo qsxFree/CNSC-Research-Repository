@@ -6,6 +6,7 @@ import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.service.PublicationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class PublicationController {
     }
 
     @GetMapping(path = "/{id}")
-    public PublicationDto getPublication(@PathVariable(name = "id") Long publicationId) {
+    public ExtendedPublicationDto getPublication(@PathVariable(name = "id") Long publicationId) {
         return service.getPublication(publicationId);
     }
 
@@ -53,7 +54,7 @@ public class PublicationController {
     }
 
     @DeleteMapping("/list")
-    public List<String> deleteAll(@RequestBody List<Long> idList){
+    public ResponseEntity deletePublications(@RequestBody List<Long> idList){
         return service.deletePublications(idList);
     }
 

@@ -5,6 +5,7 @@ import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.service.PresentationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,7 +59,7 @@ public class PresentationController {
     }
 
     @DeleteMapping("/list")
-    public List<String> deletePublications(@RequestBody List<Long> idList){
+    public ResponseEntity deletePublications(@RequestBody List<Long> idList){
         return service.deletePresentations(idList);
     }
 }
