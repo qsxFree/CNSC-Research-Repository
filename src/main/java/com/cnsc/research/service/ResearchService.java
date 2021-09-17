@@ -9,6 +9,7 @@ import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.CsvHandler;
+import com.cnsc.research.misc.EntityBuilders;
 import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -41,14 +43,10 @@ import static org.springframework.http.HttpStatus.OK;
 @Service
 public class ResearchService {
     private final Logger logger;
-    private final DeliveryUnitRepository deliveryUnitRepository;
-    private final FundingAgencyRepository fundingAgencyRepository;
-    private final ResearchersRepository researchersRepository;
     private final ResearchFileRepository researchFileRepository;
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
-    private final DateTimeFormatter formatter;
-
+    private final EntityBuilders entityBuilder;
 
     @Value("${static-directory}")
     private String staticDirectory;
@@ -60,27 +58,17 @@ public class ResearchService {
 
     @Autowired
     public ResearchService(Logger logger,
-                           DeliveryUnitRepository deliveryUnitRepository,
-                           FundingAgencyRepository fundingAgencyRepository,
-                           ResearchersRepository researchersRepository,
                            ResearchFileRepository researchFileRepository,
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
-                           DateTimeFormatter formatter
+                           EntityBuilders entityBuilder
     ) {
-
+        this.entityBuilder = entityBuilder;
         this.logger = logger;
-        this.deliveryUnitRepository = deliveryUnitRepository;
-        this.fundingAgencyRepository = fundingAgencyRepository;
-        this.researchersRepository = researchersRepository;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
         this.researchMapper = researchMapper;
-        this.formatter = formatter;
     }
-
-
-
 
     public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
         List<ResearchBatchSaveResponse> researchBatchSaveResponses = new ArrayList<>();
@@ -89,7 +77,8 @@ public class ResearchService {
     }
 
     public ResearchBatchSaveResponse saveResearch(ResearchDto researchDto) {
-        if (researchRepository.findByResearchFile_TitleIgnoreCase(researchDto.getResearchFile().getTitle()).isPresent()) {
+        logger.info(format("Research Title : %s", researchDto.getResearchFile().getTitle()));
+        if (researchRepository.findResearchByTitleAndAvailability(researchDto.getResearchFile().getTitle())) {
             return new ResearchBatchSaveResponse(researchDto.getResearchFile().getTitle(), "Already Exist!");
         }
 
@@ -101,55 +90,19 @@ public class ResearchService {
     }
 
     private Research validateRelationships(Research research) {
-        research.setResearchFile(buildResearchFile(research.getResearchFile().getTitle(), research.getResearchFile().getFileName()));
+        research.setResearchFile(entityBuilder.buildResearchFile(research.getResearchFile().getTitle(), research.getResearchFile().getFileName()));
 
         research.setFundingAgencies(research.getFundingAgencies().stream()
-                .map(fundingAgency -> buildFundingAgency(fundingAgency.getAgencyName()))
+                .map(fundingAgency -> entityBuilder.buildFundingAgency(fundingAgency.getAgencyName()))
                 .collect(Collectors.toList()));
 
         research.setResearchers(research.getResearchers().stream()
-                .map(researchers -> buildResearcher(researchers.getName()))
+                .map(researchers -> entityBuilder.buildResearcher(researchers.getName()))
                 .collect(Collectors.toList()));
 
-        research.setDeliveryUnit(buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
+        research.setDeliveryUnit(entityBuilder.buildDeliveryUnit(research.getDeliveryUnit().getUnitName()));
 
         return research;
-    }
-
-
-    private DeliveryUnit buildDeliveryUnit(String name) {
-        Optional<DeliveryUnit> deliveryUnit = deliveryUnitRepository.findByUnitNameIgnoreCase(name);
-        return deliveryUnit.orElse(DeliveryUnit
-                .builder()
-                .unitName(name)
-                .build());
-    }
-
-    private ResearchFile buildResearchFile(String title, String fileName) {
-        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
-        return researchFile.orElse(ResearchFile
-                .builder()
-                .title(title)
-                .fileName(fileName)
-                .build());
-    }
-
-    private FundingAgency buildFundingAgency(String agencyName) {
-        Optional<FundingAgency> fundingAgency = fundingAgencyRepository.findByAgencyNameIgnoreCase(agencyName);
-        return fundingAgency.orElse(FundingAgency
-                .builder()
-                .agencyName(agencyName)
-                .build()
-        );
-    }
-
-    private Researchers buildResearcher(String name) {
-        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
-        return researchers.orElse(Researchers
-                .builder()
-                .name(name)
-                .build()
-        );
     }
 
 
@@ -175,7 +128,7 @@ public class ResearchService {
     private File getPdfFile(String fileName) {
         String newName = fileName.replaceAll(" ", "-");
         newName = newName.replaceAll("[./\\:?*\"|]", "");
-        return new File(staticDirectory + "pdf\\" + newName + ".pdf");
+        return new File(staticDirectory + "pdf/" + newName + ".pdf");
     }
 
     //TODO find a solution for pdf caching to avoid duplicates on upload
@@ -256,5 +209,31 @@ public class ResearchService {
             logger.info(format("%s.pdf has been removed", fileName));
         } else return format("%s is not linked to any records");
         return format("%s file has been removed", fileName);
+    }
+
+    public ResearchDto getResearch(Integer researchId) throws Exception {
+        Optional<Research> research = researchRepository.findById(researchId);
+        if (research.isPresent()) return researchMapper.toResearchDto(research.get());
+        else throw new Exception("The research didn't exist");
+    }
+
+    public ResponseEntity deleteResearches(List<Integer> ids) {
+        AtomicInteger deletedCount = new AtomicInteger(0);
+        ids.forEach((researchId) -> {
+            try {
+                Research research = researchRepository.findById(researchId).get();
+                research.setDeleted(true);
+                research.setDatetimeDeleted(LocalDateTime.now());
+                researchRepository.save(research);
+                deletedCount.getAndIncrement();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return new ResponseEntity(format("%d items has been deleted", deletedCount.get()), OK);
+    }
+
+    public List<ResearchDto> getResearches(){
+        return researchMapper.toResearchDto(researchRepository.findByDeletedIsFalse());
     }
 }

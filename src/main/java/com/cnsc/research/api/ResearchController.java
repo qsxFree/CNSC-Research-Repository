@@ -32,8 +32,17 @@ public class ResearchController {
     }
 
     @PostMapping("/upload-csv")
-    public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws InvalidCsvFieldException, IOException, CsvException {
-        return service.getResearchesFromCsv(file);
+    public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws Exception {
+        try {
+            return service.getResearchesFromCsv(file);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        } catch (InvalidCsvFieldException e) {
+            throw new Exception(e.getMessage());
+        } catch (CsvException e) {
+            throw new Exception(e.getMessage());
+        }
+
     }
 
     @PostMapping("/pdf")
@@ -61,16 +70,32 @@ public class ResearchController {
         return service.deleteResearch(researchId);
     }
 
+    @GetMapping("/{id}")
+    public ResearchDto getResearch(@PathVariable(name = "id") Integer researchId) throws Exception {
+        return service.getResearch(researchId);
+    }
+
     @PostMapping("/batch")
     public List<ResearchBatchSaveResponse> saveResearches(@RequestBody List<ResearchDto> researchDtos) {
         return service.saveResearches(researchDtos);
     }
 
-    @GetMapping("/list")
+    @DeleteMapping("/batch")
+    public ResponseEntity deleteBatch(@RequestBody List<Integer> ids) {
+        return service.deleteResearches(ids);
+    }
+
+    @GetMapping("/batch")
     public ResearchBatchQueryResponse getAllResearches(@RequestParam int page,
                                                        @RequestParam(defaultValue = "max") String size,
                                                        @RequestParam(defaultValue = "title") String sortBy) {
         return service.getAllResearches(page, size.equals("max") ? Integer.MAX_VALUE : Integer.valueOf(size), sortBy);
     }
+
+    @GetMapping("/list")
+    public List<ResearchDto> getResearches(){
+        return service.getResearches();
+    }
+
 
 }

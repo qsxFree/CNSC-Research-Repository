@@ -71,4 +71,7 @@ public class Research {
     )
     private List<Researchers> researchers;
 
+    @OneToMany(mappedBy = "research", fetch = FetchType.LAZY)
+    private List<Presentation> presentations;
+
 }

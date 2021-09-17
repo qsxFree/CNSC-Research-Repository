@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,4 +26,7 @@ public class Researchers {
 
     @ManyToMany(mappedBy = "researchers", fetch = FetchType.LAZY)
     private Set<Research> researches;
+
+    @ManyToMany(mappedBy = "researchers",fetch = FetchType.LAZY)
+    private List<Publication> publications;
 }
