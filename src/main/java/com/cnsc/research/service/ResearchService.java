@@ -77,7 +77,8 @@ public class ResearchService {
     }
 
     public ResearchBatchSaveResponse saveResearch(ResearchDto researchDto) {
-        if (researchRepository.findResearchByTitle(researchDto.getResearchFile().getTitle()).isPresent()) {
+        logger.info(format("Research Title : %s", researchDto.getResearchFile().getTitle()));
+        if (researchRepository.findResearchByTitleAndAvailability(researchDto.getResearchFile().getTitle())) {
             return new ResearchBatchSaveResponse(researchDto.getResearchFile().getTitle(), "Already Exist!");
         }
 
@@ -230,5 +231,9 @@ public class ResearchService {
             }
         });
         return new ResponseEntity(format("%d items has been deleted", deletedCount.get()), OK);
+    }
+
+    public List<ResearchDto> getResearches(){
+        return researchMapper.toResearchDto(researchRepository.findByDeletedIsFalse());
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,5 +19,10 @@ public interface ResearchRepository extends PagingAndSortingRepository<Research,
 
     @Query("select r from Research r where upper(r.researchFile.title) = upper(?1) and r.deleted = false")
     Optional<Research> findResearchByTitle(String title);
+
+    @Query("select (count(r) > 0) from Research r where upper(r.researchFile.title) = upper(?1) and r.deleted = false")
+    boolean findResearchByTitleAndAvailability(String title);
+
+    List<Research> findByDeletedIsFalse();
 
 }

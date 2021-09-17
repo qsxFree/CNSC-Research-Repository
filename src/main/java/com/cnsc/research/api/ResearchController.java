@@ -85,11 +85,17 @@ public class ResearchController {
         return service.deleteResearches(ids);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/batch")
     public ResearchBatchQueryResponse getAllResearches(@RequestParam int page,
                                                        @RequestParam(defaultValue = "max") String size,
                                                        @RequestParam(defaultValue = "title") String sortBy) {
         return service.getAllResearches(page, size.equals("max") ? Integer.MAX_VALUE : Integer.valueOf(size), sortBy);
     }
+
+    @GetMapping("/list")
+    public List<ResearchDto> getResearches(){
+        return service.getResearches();
+    }
+
 
 }
