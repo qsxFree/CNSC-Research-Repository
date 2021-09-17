@@ -3,8 +3,10 @@ package com.cnsc.research.service;
 import com.cnsc.research.domain.exception.InvalidCsvFieldException;
 import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
-import com.cnsc.research.domain.model.*;
-import com.cnsc.research.domain.repository.*;
+import com.cnsc.research.domain.model.Research;
+import com.cnsc.research.domain.model.ResearchFile;
+import com.cnsc.research.domain.repository.ResearchFileRepository;
+import com.cnsc.research.domain.repository.ResearchRepository;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
@@ -29,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -200,7 +201,7 @@ public class ResearchService {
     public String deletePdf(String title) {
         File file = getPdfFile(title);
         String fileName = file.getName().replace(".pdf", "");
-        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
+        Optional<ResearchFile> researchFile = researchFileRepository.findByResearchTitleAndAvailabiity(title);
         if (file.exists()) file.delete();
         else return "There is nothing to delete.";
         if (researchFile.isPresent()) {
@@ -223,6 +224,7 @@ public class ResearchService {
             try {
                 Research research = researchRepository.findById(researchId).get();
                 research.setDeleted(true);
+                research.getResearchFile().setDeleted(true);
                 research.setDatetimeDeleted(LocalDateTime.now());
                 researchRepository.save(research);
                 deletedCount.getAndIncrement();
@@ -233,7 +235,8 @@ public class ResearchService {
         return new ResponseEntity(format("%d items has been deleted", deletedCount.get()), OK);
     }
 
-    public List<ResearchDto> getResearches(){
-        return researchMapper.toResearchDto(researchRepository.findByDeletedIsFalse());
+    public List<ResearchDto> getResearches() {
+        List<Research> researches = researchRepository.findByDeletedIsFalse();
+        return researchMapper.toResearchDto(researches);
     }
 }

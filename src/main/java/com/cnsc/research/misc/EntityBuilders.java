@@ -92,7 +92,7 @@ public class EntityBuilders {
      * @return ResearchFile
      */
     public ResearchFile buildResearchFile(String title, String fileName) {
-        Optional<ResearchFile> researchFile = researchFileRepository.findByTitleIgnoreCase(title);
+        Optional<ResearchFile> researchFile = researchFileRepository.findByResearchTitleAndAvailabiity(title);
         return researchFile.orElse(ResearchFile
                 .builder()
                 .title(title)

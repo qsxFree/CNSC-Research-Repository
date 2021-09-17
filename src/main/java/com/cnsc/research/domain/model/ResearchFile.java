@@ -27,7 +27,6 @@ public class ResearchFile {
     @OneToOne(mappedBy = "researchFile", fetch = FetchType.LAZY)
     private Research research;
 
-    @Transient
-    private Byte deleted;
+    private boolean deleted;
 
 }
