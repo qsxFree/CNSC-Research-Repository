@@ -16,7 +16,7 @@ public class PresentationDto {
     private Long presentationId;
     private String presentationTitle;
     private String presentationType;
-    private List<String> researchers;
+    private List<ResearchersDto> researchers;
     private LocalDate presentationDate;
 
 

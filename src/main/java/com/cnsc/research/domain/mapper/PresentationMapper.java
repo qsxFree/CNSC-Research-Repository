@@ -2,7 +2,6 @@ package com.cnsc.research.domain.mapper;
 
 import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
-import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.misc.EntityBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +12,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.cnsc.research.domain.model.PresentationType.*;
-import static com.cnsc.research.domain.model.PresentationType.INTERNATIONAL;
 
 @Component
 public class PresentationMapper {
 
     private final EntityBuilders entityBuilders;
+    private final ResearcherMapper researcherMapper;
 
     @Autowired
-    public PresentationMapper( EntityBuilders entityBuilders) {
+    public PresentationMapper(EntityBuilders entityBuilders, ResearcherMapper researcherMapper) {
         this.entityBuilders = entityBuilders;
+        this.researcherMapper = researcherMapper;
     }
 
     public PresentationDto toPresentationDto(Presentation presentation) {
@@ -31,13 +31,7 @@ public class PresentationMapper {
                 .presentationDate(presentation.getPresentationDate())
                 .presentationType(presentation.getType().name().toLowerCase())
                 .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
-                .researchers(presentation
-                        .getResearch()
-                        .getResearchers()
-                        .stream()
-                        .map(Researchers::getName)
-                        .collect(Collectors.toList())
-                )
+                .researchers(researcherMapper.toResearchDto(presentation.getResearch().getResearchers()))
                 .build();
     }
 
