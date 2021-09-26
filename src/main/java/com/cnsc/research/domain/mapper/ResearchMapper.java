@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * The type Research mapper.
  */
 @Component
-public class ResearchMapper {
+public class ResearchMapper implements ListMapper<Research, ResearchDto> {
 
     private final DateTimeFormatter formatter;
 
@@ -235,4 +235,13 @@ public class ResearchMapper {
     }
 
 
+    @Override
+    public List<Research> toDomain(Collection<ResearchDto> transactionData) {
+        return toResearch(transactionData);
+    }
+
+    @Override
+    public List<ResearchDto> toTransaction(Collection<Research> domainData) {
+        return toResearchDto(domainData);
+    }
 }
