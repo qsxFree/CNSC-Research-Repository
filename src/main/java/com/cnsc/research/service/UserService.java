@@ -1,13 +1,12 @@
 package com.cnsc.research.service;
 
-import com.cnsc.research.domain.transaction.UserDto;
 import com.cnsc.research.domain.exception.AccountAlreadyExistException;
 import com.cnsc.research.domain.exception.AccountNotFound;
 import com.cnsc.research.domain.mapper.UserMapper;
 import com.cnsc.research.domain.model.User;
 import com.cnsc.research.domain.repository.UserRepository;
+import com.cnsc.research.domain.transaction.UserDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +40,10 @@ public class UserService {
     public UserDto retrieveUserByid(int id) throws AccountNotFound {
         Optional<User> user = userRepository.findById((long) id);
         if (user.isEmpty()) throw new AccountNotFound(id);
-        return mapper.toUserDto(user.get());
+        return mapper.toTransaction(user.get());
     }
 
     public List<UserDto> retrieveUsers(){
-        return mapper.toUserDto(userRepository.findAll());
+        return mapper.toTransaction(userRepository.findAll());
     }
 }

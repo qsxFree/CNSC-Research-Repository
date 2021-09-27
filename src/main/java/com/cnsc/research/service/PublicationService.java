@@ -5,8 +5,8 @@ import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.repository.PublicationRepository;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
-import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.domain.transaction.PublicationDto;
+import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,37 +41,36 @@ public class PublicationService {
         this.entityBuilders = entityBuilders;
     }
 
-    public PublicationSaveResponse addPublication(ExtendedPublicationDto publicationDto) {
-        if (repository.findByPublicationTitleIgnoreCaseAndDeleted(publicationDto.getPublicationTitle(), false).isPresent())
-            return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Already Exist!");
-        Publication publication = publicationMapper.toPublication(publicationDto);
-
-        //REMINDER -- this might cause a performance issue someday.
-        // run profiling and change the implementation.
-        List<Researchers> researchers = publication.getResearchers()
-                .stream()
-                .map(item -> entityBuilders.buildResearcher(item.getName()))
-                .collect(Collectors.toList());
-
-        publication.setResearchers(researchers);
-
+    public PublicationSaveResponse addPublication(PublicationDto publicationDto) {
         try {
+            if (repository.findByPublicationTitleIgnoreCaseAndDeleted(publicationDto.getPublicationTitle(), false).isPresent())
+                return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Already Exist!");
+            Publication publication = publicationMapper.toDomain(publicationDto);
+
+            //REMINDER -- this might cause a performance issue someday.
+            // run profiling and change the implementation.
+            List<Researchers> researchers = publication.getResearchers()
+                    .stream()
+                    .map(item -> entityBuilders.buildResearcher(item.getName()))
+                    .collect(Collectors.toList());
+
+            publication.setResearchers(researchers);
             repository.save(publication);
             return new PublicationSaveResponse(publication.getPublicationTitle(), "Saved!");
         } catch (Exception e) {
-            logger.error(format("Error on saving %s", publication.getPublicationId()));
+            logger.error(format("Error on saving %s", publicationDto.getPublicationId()));
             logger.error(e.getMessage());
-            return new PublicationSaveResponse(publication.getPublicationTitle(), "Error!");
+            return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Error!");
         }
     }
 
     public ExtendedPublicationDto getPublication(Long publicationId) {
-        return publicationMapper.toExtendedPublicationDto(repository.getById(publicationId));
+        return publicationMapper.toExtendedTransaction(repository.getById(publicationId));
     }
 
     public String editPublication(PublicationDto publicationDto) {
-        Publication publication = publicationMapper.toPublication((ExtendedPublicationDto) publicationDto);
         try {
+            Publication publication = publicationMapper.toDomain(publicationDto);
             repository.save(publication);
             return "Publication saved";
         } catch (Exception e) {
@@ -100,7 +99,7 @@ public class PublicationService {
     public List<ExtendedPublicationDto> getPublications() {
         try {
             List<Publication> publicationList = repository.findByDeletedIsFalse();
-            return publicationMapper.toExtededPublicationDto(publicationList);
+            return publicationMapper.toExtendedTransaction(publicationList);
         } catch (Exception e) {
             logger.error(format("Line 98 : %s", e.getMessage()));
             return List.of();
