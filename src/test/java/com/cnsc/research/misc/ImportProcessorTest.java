@@ -3,6 +3,7 @@ package com.cnsc.research.misc;
 import com.cnsc.research.misc.fields.ResearchFields;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +14,7 @@ class ImportProcessorTest {
 
     {
         try {
-            processor = new ImportProcessor("C:\\Users\\LC-IPDO-05\\Downloads\\dummy.xlsx", new ResearchFields());
+            processor = new ImportProcessor(new File("C:\\Users\\LC-IPDO-05\\Downloads\\dummy.xlsx"), new ResearchFields());
         } catch (IOException | InvalidExcelField | InvalidExcelCellType e) {
             e.printStackTrace();
         }

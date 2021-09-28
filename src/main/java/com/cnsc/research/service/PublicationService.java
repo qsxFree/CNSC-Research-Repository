@@ -5,8 +5,8 @@ import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.repository.PublicationRepository;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
-import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.domain.transaction.PublicationDto;
+import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.UploadHandler;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class PublicationService {
         this.logger = logger;
         this.publicationMapper = publicationMapper;
         this.entityBuilders = entityBuilders;
-        currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
     }
 
     public PublicationSaveResponse addPublication(ExtendedPublicationDto publicationDto) {
@@ -134,8 +134,10 @@ public class PublicationService {
     }
 
     public List<PublicationDto> processXls(MultipartFile incomingFile) throws IOException {
+        currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         uploadHandler = new UploadHandler(currentUser.getUsername());
         uploadHandler.process(incomingFile);
+        uploadHandler.deleteCachedFile();
         return List.of(null);
     }
 }

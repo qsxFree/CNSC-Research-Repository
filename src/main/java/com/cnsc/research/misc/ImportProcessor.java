@@ -4,12 +4,13 @@ import com.cnsc.research.misc.fields.ValidFields;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ImportProcessor<T> {
+public class ImportProcessor {
     private final FileInputStream fileInputStream;
     private final Workbook workbook;
     private final Sheet sheet;
@@ -22,8 +23,8 @@ public class ImportProcessor<T> {
     */
     private Map<String, Integer> keyArrangement;
 
-    public ImportProcessor(String path, ValidFields validFields) throws IOException, InvalidExcelCellType, InvalidExcelField {
-        this.fileInputStream = new FileInputStream(path);
+    public ImportProcessor(File file, ValidFields validFields) throws IOException, InvalidExcelCellType, InvalidExcelField {
+        this.fileInputStream = new FileInputStream(file);
         this.workbook = new XSSFWorkbook(fileInputStream);
         this.sheet = workbook.getSheetAt(0);
         this.validFields = validFields;
@@ -58,7 +59,7 @@ public class ImportProcessor<T> {
         /*
          * Iterates the raw fields.
          * it is important to put this in a standard loop syntax to identify the position
-         * of the field in excel file.
+         * of the field in Excel file.
          * */
         for (int index = 0; index < getRawFields().length; index++) {
             String currentField = getRawFields()[index];
