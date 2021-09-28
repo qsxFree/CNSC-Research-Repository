@@ -8,11 +8,16 @@ import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.misc.EntityBuilders;
+import com.cnsc.research.misc.UploadHandler;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +34,9 @@ public class PublicationService {
     private final PublicationMapper publicationMapper;
     private final EntityBuilders entityBuilders;
 
+    private UploadHandler uploadHandler;
+    private UserDetails currentUser;
+
     @Autowired
     public PublicationService(PublicationRepository repository,
                               PublicationMapper publicationMapper,
@@ -39,6 +47,7 @@ public class PublicationService {
         this.logger = logger;
         this.publicationMapper = publicationMapper;
         this.entityBuilders = entityBuilders;
+        currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     public PublicationSaveResponse addPublication(ExtendedPublicationDto publicationDto) {
@@ -122,5 +131,11 @@ public class PublicationService {
                 deleteCount.getAndIncrement();
         });
         return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
+    }
+
+    public List<PublicationDto> processXls(MultipartFile incomingFile) throws IOException {
+        uploadHandler = new UploadHandler(currentUser.getUsername());
+        uploadHandler.process(incomingFile);
+        return List.of(null);
     }
 }
