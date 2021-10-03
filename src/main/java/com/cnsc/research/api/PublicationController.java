@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -58,4 +60,13 @@ public class PublicationController {
         return service.deletePublications(idList);
     }
 
+    @PostMapping("/xls")
+    public List<PublicationDto> uploadCsv(@RequestParam("file")MultipartFile incomingFile){
+        try {
+            return service.processXls(incomingFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
