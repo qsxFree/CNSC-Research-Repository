@@ -109,21 +109,8 @@ public class ResearchService {
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
         this.csvFile = file;
-        csv = rewriteFileToLocal();
+        csv = new CsvHandler(file.getBytes());
         return researchMapper.excelToTransactions(csv.getRows(), csv.getRowIndices());
-    }
-
-    private CsvHandler rewriteFileToLocal() throws IOException {
-        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
-
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-
-        logger.info("writing file...");
-
-        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
-        CsvHandler handler = new CsvHandler(file);
-        file.delete();
-        return handler;
     }
 
     private File getPdfFile(String fileName) {

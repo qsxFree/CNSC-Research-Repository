@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.ApplicationContext;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,18 +33,18 @@ public class CsvHandler {
             Arrays.asList("remark","remarks","with moa","with_moa","comment","comments")                    //REMARKS
     );
 
-    private Map<String,Integer> rowIndex;
+    private final Map<String, Integer> rowIndex;
 
-    private CSVReader reader;
+    private final CSVReader reader;
 
     @Autowired
     private Logger logger ;
 
-    public CsvHandler(File file) throws FileNotFoundException {
+    public CsvHandler(byte[] streamData) throws FileNotFoundException {
         ApplicationContext context = SystemContext.getAppContext();
         logger = context.getBean(Logger.class);
         rowIndex = new HashMap<>();
-        reader = new CSVReader(new FileReader(file));
+        reader = new CSVReader(new InputStreamReader(new ByteArrayInputStream(streamData)));
     }
 
 
