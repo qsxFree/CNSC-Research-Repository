@@ -83,7 +83,7 @@ public class ResearchService {
             return new ResearchBatchSaveResponse(researchDto.getResearchFile().getTitle(), "Already Exist!");
         }
 
-        Research research = researchMapper.toResearch(researchDto);
+        Research research = researchMapper.toDomain(researchDto);
         logger.info(research.toString());
         researchRepository.save(validateRelationships(research));
 
@@ -109,21 +109,8 @@ public class ResearchService {
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
         this.csvFile = file;
-        csv = rewriteFileToLocal();
-        return researchMapper.csvToResearchDto(csv.getRows(), csv.getRowIndices());
-    }
-
-    private CsvHandler rewriteFileToLocal() throws IOException {
-        File file = new File(staticDirectory + csvFile.getOriginalFilename());//creating directory
-
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-
-        logger.info("writing file...");
-
-        fileOutputStream.write(csvFile.getBytes());//rewriting temporary file
-        CsvHandler handler = new CsvHandler(file);
-        file.delete();
-        return handler;
+        csv = new CsvHandler(file.getBytes());
+        return researchMapper.excelToTransactions(csv.getRows(), csv.getRowIndices());
     }
 
     private File getPdfFile(String fileName) {
@@ -165,7 +152,7 @@ public class ResearchService {
         int prev = page - 1;
 
         List<Research> queryResult = pageResult.getContent();
-        ResearchBatchQueryResponse response = new ResearchBatchQueryResponse(researchMapper.toResearchDto(queryResult), next, prev, totalPage, totalElements);
+        ResearchBatchQueryResponse response = new ResearchBatchQueryResponse(researchMapper.toTransaction(queryResult), next, prev, totalPage, totalElements);
         return response;
     }
 
@@ -173,7 +160,7 @@ public class ResearchService {
         ResponseEntity<String> response = null;
 
         try {
-            Research research = researchMapper.toResearch(researchDto);
+            Research research = researchMapper.toDomain(researchDto);
             researchRepository.save(research);
             response = new ResponseEntity("Research Successfully Updated!", OK);
         } catch (Exception e) {
@@ -214,7 +201,7 @@ public class ResearchService {
 
     public ResearchDto getResearch(Integer researchId) throws Exception {
         Optional<Research> research = researchRepository.findById(researchId);
-        if (research.isPresent()) return researchMapper.toResearchDto(research.get());
+        if (research.isPresent()) return researchMapper.toTransaction(research.get());
         else throw new Exception("The research didn't exist");
     }
 
@@ -237,6 +224,6 @@ public class ResearchService {
 
     public List<ResearchDto> getResearches() {
         List<Research> researches = researchRepository.findByDeletedIsFalse();
-        return researchMapper.toResearchDto(researches);
+        return researchMapper.toTransaction(researches);
     }
 }

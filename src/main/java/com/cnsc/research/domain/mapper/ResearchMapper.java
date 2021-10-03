@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
  * The type Research mapper.
  */
 @Component
-public class ResearchMapper {
+public class ResearchMapper extends ExcelMapper<Research, ResearchDto> {
 
     private final DateTimeFormatter formatter;
 
@@ -31,13 +30,7 @@ public class ResearchMapper {
         this.formatter = formatter;
     }
 
-    /**
-     * Mapping for Research to ResearchDTO
-     *
-     * @param research the research
-     * @return the research dto
-     */
-    public ResearchDto toResearchDto(Research research) {
+    public ResearchDto toTransaction(Research research) {
         int id = research.getResearchId();
         double budget = research.getBudget();
         LocalDate startDate = research.getStartDate();
@@ -87,26 +80,7 @@ public class ResearchMapper {
         );
     }
 
-    /**
-     * Mapping for Research to ResearchDTO
-     *
-     * @param data the data
-     * @return the list
-     */
-    public List<ResearchDto> toResearchDto(Collection<Research> data) {
-        return data.stream()
-                .map(this::toResearchDto)
-                .collect(Collectors.toList());
-    }
-
-
-    /**
-     * Mapping for ResearchDTO To Research.
-     *
-     * @param researchDto the research dto
-     * @return the research
-     */
-    public Research toResearch(ResearchDto researchDto) {
+    public Research toDomain(ResearchDto researchDto) {
         Research research = new Research();
 
         research.setResearchId(researchDto.getId());
@@ -165,42 +139,9 @@ public class ResearchMapper {
         return research;
     }
 
-    /**
-     * Mapping for ResearchDTO To Research.
-     *
-     * @param data the data
-     * @return the list
-     */
-    public List<Research> toResearch(Collection<ResearchDto> data) {
-        return data.stream()
-                .map(this::toResearch)
-                .collect(Collectors.toList());
-    }
-
-
-    /**
-     * A special mapping from CSV data to ResearchDto
-     *
-     * @param csvRows the csv rows
-     * @param indices the indices
-     * @return the list
-     */
-    public List<ResearchDto> csvToResearchDto(List<String[]> csvRows, Map<String, Integer> indices) {
-        return csvRows.stream()
-                .map(csvRow -> this.csvToResearchDto(csvRow, indices))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * A special mapping from CSV data to ResearchDto
-     *
-     * @param csvRow  the csv row
-     * @param indices the indices
-     * @return the research dto
-     */
-    public ResearchDto csvToResearchDto(String[] csvRow, Map<String, Integer> indices) {
-        String[] researchers = csvRow[indices.get("RESEARCHERS")].split(",");
-        String[] fundingAgency = csvRow[indices.get("FUNDING_AGENCY")].split(",");
+    public ResearchDto excelToTransaction(String[] csvRow, Map<String, Integer> keyArrangement) {
+        String[] researchers = csvRow[keyArrangement.get("RESEARCHERS")].split(",");
+        String[] fundingAgency = csvRow[keyArrangement.get("FUNDING_AGENCY")].split(",");
 
         List<ResearchDto.Researchers> researcherList = Arrays.stream(researchers)
                 .map(data ->
@@ -222,17 +163,18 @@ public class ResearchMapper {
         return new ResearchDto(
                 null,
                 fundingAgencies,
-                Double.valueOf(csvRow[indices.get("BUDGET")]),
-                LocalDate.from(formatter.parse(csvRow[indices.get("START_DATE")])),
-                LocalDate.from(formatter.parse(csvRow[indices.get("END_DATE")])),
-                csvRow[indices.get("STATUS")],
-                ResearchDto.DeliveryUnit.builder().unitName(csvRow[indices.get("DELIVERY_UNIT")]).build(),
-                csvRow[indices.get("REMARK")],
+                Double.valueOf(csvRow[keyArrangement.get("BUDGET")]),
+                LocalDate.from(formatter.parse(csvRow[keyArrangement.get("START_DATE")])),
+                LocalDate.from(formatter.parse(csvRow[keyArrangement.get("END_DATE")])),
+                csvRow[keyArrangement.get("STATUS")],
+                ResearchDto.DeliveryUnit.builder().unitName(csvRow[keyArrangement.get("DELIVERY_UNIT")]).build(),
+                csvRow[keyArrangement.get("REMARK")],
                 researcherList,
-                ResearchDto.ResearchFile.builder().title(csvRow[indices.get("TITLE")]).build()
+                ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get("TITLE")]).build()
         );
 
     }
+
 
 
 }
