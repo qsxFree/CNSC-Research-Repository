@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class CsvHandler {
     @Autowired
     private Logger logger ;
 
-    public CsvHandler(byte[] streamData) throws FileNotFoundException {
+    public CsvHandler(byte[] streamData) {
         ApplicationContext context = SystemContext.getAppContext();
         logger = context.getBean(Logger.class);
         rowIndex = new HashMap<>();
