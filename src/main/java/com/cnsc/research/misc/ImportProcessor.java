@@ -4,14 +4,12 @@ import com.cnsc.research.misc.fields.ValidFields;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ImportProcessor {
-    private final FileInputStream fileInputStream;
     private final Workbook workbook;
     private final Sheet sheet;
     private final ValidFields validFields;
@@ -23,9 +21,8 @@ public class ImportProcessor {
     */
     private Map<String, Integer> keyArrangement;
 
-    public ImportProcessor(File file, ValidFields validFields) throws IOException, InvalidExcelCellType, InvalidExcelField {
-        this.fileInputStream = new FileInputStream(file);
-        this.workbook = new XSSFWorkbook(fileInputStream);
+    public ImportProcessor(byte[] dataStream, ValidFields validFields) throws IOException, InvalidExcelCellType, InvalidExcelField {
+        this.workbook = new XSSFWorkbook(new ByteArrayInputStream(dataStream));
         this.sheet = workbook.getSheetAt(0);
         this.validFields = validFields;
         validateFields();
@@ -36,7 +33,7 @@ public class ImportProcessor {
     Get the topmost row that represents the fields in the excel file.
     The fields are important because it is used to validate cell value.
     */
-    private String[] getRawFields() throws InvalidExcelCellType {
+    private String[] getRawFields() throws InvalidExcelCellType, IOException {
         firstRow = sheet.getRow(sheet.getTopRow());
 
         Iterator<Cell> cellIterator = firstRow.iterator();
@@ -46,14 +43,17 @@ public class ImportProcessor {
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
             if (cell.getCellType() == CellType.STRING) fields.add(cell.getStringCellValue().toLowerCase().trim());
-            else throw new InvalidExcelCellType("Invalid cell type");
+            else {
+                workbook.close();
+                throw new InvalidExcelCellType("Invalid cell type");
+            }
         }
-
+        sheet.removeRow(firstRow);//to remove after getting the rawfields
         return fields.toArray(String[]::new);
     }
 
     //Validates the field by the given ValidField implementation.
-    private void validateFields() throws InvalidExcelCellType, InvalidExcelField {
+    private void validateFields() throws InvalidExcelCellType, InvalidExcelField, IOException {
         keyArrangement = new HashMap<>();// will define the arrangement of fields
 
         /*
@@ -76,6 +76,7 @@ public class ImportProcessor {
             if (valueExist) {
                 keyArrangement.put(validKey.get(), index);
             } else {
+                workbook.close();
                 throw new InvalidExcelField("Invalid excel field named " + currentField);
             }
         }
@@ -91,4 +92,10 @@ public class ImportProcessor {
         keyArrangement.forEach((k, v) -> keys.add(k));
         return keys.toArray(String[]::new);
     }
+
+    public void close() throws IOException {
+        this.workbook.close();
+    }
+
+
 }
