@@ -1,12 +1,10 @@
 package com.cnsc.research.api;
 
-import com.cnsc.research.domain.exception.InvalidCsvFieldException;
 import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.service.ResearchService;
-import com.opencsv.exceptions.CsvException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
@@ -35,11 +32,7 @@ public class ResearchController {
     public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws Exception {
         try {
             return service.getResearchesFromCsv(file);
-        } catch (IOException e) {
-            throw new Exception(e.getMessage());
-        } catch (InvalidCsvFieldException e) {
-            throw new Exception(e.getMessage());
-        } catch (CsvException e) {
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
 
