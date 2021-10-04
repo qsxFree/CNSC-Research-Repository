@@ -2,6 +2,7 @@ package com.cnsc.research.domain.mapper;
 
 import com.cnsc.research.domain.model.*;
 import com.cnsc.research.domain.transaction.ResearchDto;
+import com.cnsc.research.misc.fields.ResearchFields;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * The type Research mapper.
  */
 @Component
-public class ResearchMapper extends ExcelMapper<Research, ResearchDto> {
+public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
 
     private final DateTimeFormatter formatter;
 
@@ -139,9 +140,9 @@ public class ResearchMapper extends ExcelMapper<Research, ResearchDto> {
         return research;
     }
 
-    public ResearchDto excelToTransaction(String[] csvRow, Map<String, Integer> keyArrangement) {
-        String[] researchers = csvRow[keyArrangement.get("RESEARCHERS")].split(",");
-        String[] fundingAgency = csvRow[keyArrangement.get("FUNDING_AGENCY")].split(",");
+    public ResearchDto dataImportToTransaction(String[] csvRow, Map<String, Integer> keyArrangement) {
+        String[] researchers = csvRow[keyArrangement.get(ResearchFields.RESEARCHER_KEY)].split(",");
+        String[] fundingAgency = csvRow[keyArrangement.get(ResearchFields.FUNDING_AGENCY_KEY)].split(",");
 
         List<ResearchDto.Researchers> researcherList = Arrays.stream(researchers)
                 .map(data ->
@@ -163,14 +164,14 @@ public class ResearchMapper extends ExcelMapper<Research, ResearchDto> {
         return new ResearchDto(
                 null,
                 fundingAgencies,
-                Double.valueOf(csvRow[keyArrangement.get("BUDGET")]),
-                LocalDate.from(formatter.parse(csvRow[keyArrangement.get("START_DATE")])),
-                LocalDate.from(formatter.parse(csvRow[keyArrangement.get("END_DATE")])),
-                csvRow[keyArrangement.get("STATUS")],
-                ResearchDto.DeliveryUnit.builder().unitName(csvRow[keyArrangement.get("DELIVERY_UNIT")]).build(),
-                csvRow[keyArrangement.get("REMARK")],
+                Double.valueOf(csvRow[keyArrangement.get(ResearchFields.BUDGET_KEY)]),
+                LocalDate.from(formatter.parse(csvRow[keyArrangement.get(ResearchFields.START_DATE_KEY)])),
+                LocalDate.from(formatter.parse(csvRow[keyArrangement.get(ResearchFields.END_DATE_KEY)])),
+                csvRow[keyArrangement.get(ResearchFields.RESEARCH_STATUS_KEY)],
+                ResearchDto.DeliveryUnit.builder().unitName(csvRow[keyArrangement.get(ResearchFields.DELIVERY_UNIT_KEY)]).build(),
+                csvRow[keyArrangement.get(ResearchFields.REMARK_KEY)],
                 researcherList,
-                ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get("TITLE")]).build()
+                ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get(ResearchFields.TITLE_KEY)]).build()
         );
 
     }

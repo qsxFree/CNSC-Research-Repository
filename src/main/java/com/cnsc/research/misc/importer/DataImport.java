@@ -1,6 +1,8 @@
-package com.cnsc.research.misc.util;
+package com.cnsc.research.misc.importer;
 
 import com.cnsc.research.configuration.util.SystemContext;
+import com.cnsc.research.domain.mapper.DataImportMapper;
+import com.cnsc.research.domain.transaction.Mappable;
 import com.cnsc.research.misc.fields.ValidFields;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -14,7 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Configurable
-public abstract class DataImport {
+public abstract class DataImport<T extends Mappable> {
     private final ApplicationContext context = SystemContext.getAppContext();
     protected Map<String, Integer> keyArrangement;
     protected ValidFields validFields;
@@ -27,7 +29,7 @@ public abstract class DataImport {
     public abstract void close() throws IOException;
 
     protected void validateFields() throws Exception {
-        keyArrangement = new HashMap<>();// will define the arrangement of fields
+        Map<String, Integer> tempKeyArrangementAllocator = new HashMap<>();// will define the arrangement of fields
         /*
           Iterates the raw fields.
           it is important to put this in a standard loop syntax to identify the position
@@ -48,22 +50,39 @@ public abstract class DataImport {
                     });
 
             if (valueExist) {
-                keyArrangement.put(validKey.get(), index);
+                tempKeyArrangementAllocator.put(validKey.get(), index);
             } else {
                 close();
                 Optional<String> missingValue = validFields.getFieldKeys()
                         .stream()
-                        .filter(field -> keyArrangement.get(field) == null)
+                        .filter(field -> tempKeyArrangementAllocator.get(field) == null)
                         .findFirst();
                 throw new InvalidFieldException(missingValue.orElse(""));
             }
         }
-        if (rawFields.length != keyArrangement.size()) throw new InvalidFieldCountException("invalid field size");
+
+        keyArrangement = Map.copyOf(tempKeyArrangementAllocator);
+
+        if (rawFields.length != keyArrangement.size()) {
+            close();
+            throw new InvalidFieldCountException("invalid field size");
+        }
         logger.info("Done field validation");
     }
 
 
+    /**
+     * Gets row indices.
+     * returns the 1st row of csv that contains the cell identifier or the field
+     *
+     * @return the row indices
+     */
     public Map<String, Integer> getKeyArrangement() {
         return keyArrangement;
+    }
+
+
+    public List<T> getMappedData(DataImportMapper mapper) throws Exception {
+        return mapper.dataImportToTransaction(getRawData(), getKeyArrangement());
     }
 }

@@ -1,5 +1,6 @@
-package com.cnsc.research.misc.util;
+package com.cnsc.research.misc.importer;
 
+import com.cnsc.research.domain.transaction.Mappable;
 import com.cnsc.research.misc.fields.ValidFields;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ExcelImport extends DataImport {
+public class ExcelImport<T extends Mappable> extends DataImport<T> {
     private final Workbook workbook;
     private final Sheet sheet;
     private Row firstRow;
@@ -32,6 +33,7 @@ public class ExcelImport extends DataImport {
     Get the topmost row that represents the fields in the excel file.
     The fields are important because it is used to validate cell value.
     */
+    @Override
     protected String[] getRawFields() throws Exception {
         firstRow = sheet.getRow(sheet.getTopRow());
 
@@ -43,7 +45,7 @@ public class ExcelImport extends DataImport {
             Cell cell = cellIterator.next();
             if (cell.getCellType() == CellType.STRING) fields.add(cell.getStringCellValue().toLowerCase().trim());
             else {
-                workbook.close();
+                close();
                 throw new InvalidExcelCellType("Invalid cell type");
             }
         }
@@ -53,15 +55,33 @@ public class ExcelImport extends DataImport {
 
     @Override
     public List<String[]> getRawData() {
-        return null;
+        List<String[]> result = new ArrayList<>();
+        Iterator<Row> rowIterator = sheet.iterator();
+        rowIterator.forEachRemaining((row) -> {
+            Iterator<Cell> cellIterator = row.iterator();
+            List<String> rowValues = new ArrayList<>();
+            cellIterator.forEachRemaining((cell -> {
+                switch (cell.getCellType()) {
+                    case STRING:
+                        rowValues.add(cell.getStringCellValue());
+                        break;
+                    case NUMERIC:
+                        rowValues.add(String.valueOf(cell.getNumericCellValue()));
+                        break;
+                    case BOOLEAN:
+                        rowValues.add(String.valueOf(cell.getBooleanCellValue()));
+                        break;
+                    default:
+                        rowValues.add("");
+                        break;
+                }
+            }));
+            result.add(rowValues.toArray(new String[0]));
+        });
+        return result;
     }
 
-    public String[] getFieldKeys() {
-        List<String> keys = new ArrayList<>();
-        keyArrangement.forEach((k, v) -> keys.add(k));
-        return keys.toArray(String[]::new);
-    }
-
+    @Override
     public void close() throws IOException {
         this.workbook.close();
     }

@@ -1,5 +1,6 @@
-package com.cnsc.research.misc.util;
+package com.cnsc.research.misc.importer;
 
+import com.cnsc.research.domain.transaction.Mappable;
 import com.cnsc.research.misc.fields.ValidFields;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -8,13 +9,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Map;
 
-public class CsvImport extends DataImport {
+public class CsvImport<T extends Mappable> extends DataImport<T> {
 
     private final CSVReader reader;
     private String[] firstRow;
-
 
     public CsvImport(byte[] dataStream, ValidFields validFields) throws Exception {
         super.validFields = validFields;
@@ -22,6 +21,7 @@ public class CsvImport extends DataImport {
         validateFields();
     }
 
+    @Override
     public List<String[]> getRawData() throws IOException, CsvException {
         List<String[]> rows = reader.readAll();
         rows.remove(0);   // The 1st row csv will contain the fields or the column info.
@@ -29,21 +29,10 @@ public class CsvImport extends DataImport {
         return rows;
     }
 
+    @Override
     protected String[] getRawFields() throws Exception {
         this.firstRow = reader.peek();
         return this.firstRow;
-    }
-
-
-    /**
-     * Gets row indices.
-     * returns the 1st row of csv that contains the cell identifier or the field
-     *
-     * @return the row indices
-     */
-    @Override
-    public Map<String, Integer> getKeyArrangement() {
-        return super.keyArrangement;
     }
 
 

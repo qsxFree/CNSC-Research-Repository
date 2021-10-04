@@ -11,7 +11,7 @@ import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
-import com.cnsc.research.misc.util.CsvImport;
+import com.cnsc.research.misc.importer.CsvImport;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,8 +108,8 @@ public class ResearchService {
 
     public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws Exception {
         this.csvFile = file;
-        csv = new CsvImport(file.getBytes(), new ResearchFields());
-        return researchMapper.excelToTransactions(csv.getRawData(), csv.getKeyArrangement());
+        csv = new CsvImport<ResearchDto>(file.getBytes(), new ResearchFields());
+        return csv.getMappedData(researchMapper);
     }
 
     private File getPdfFile(String fileName) {
