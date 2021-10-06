@@ -4,6 +4,7 @@ import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.misc.EntityBuilders;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,13 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
 
     private final EntityBuilders entityBuilders;
     private final ResearcherMapper researcherMapper;
+    private final Logger logger;
 
     @Autowired
-    public PresentationMapper(EntityBuilders entityBuilders, ResearcherMapper researcherMapper) {
+    public PresentationMapper(EntityBuilders entityBuilders, ResearcherMapper researcherMapper, Logger logger) {
         this.entityBuilders = entityBuilders;
         this.researcherMapper = researcherMapper;
+        this.logger = logger;
     }
 
     public PresentationDto toTransaction(Presentation presentation) {
