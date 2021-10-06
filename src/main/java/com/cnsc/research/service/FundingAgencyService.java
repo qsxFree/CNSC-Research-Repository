@@ -13,14 +13,16 @@ import java.util.List;
 public class FundingAgencyService {
     private final FundingAgencyRepository repository;
     private final Logger logger;
+    private final FundingAgencyMapper mapper;
 
     @Autowired
-    public FundingAgencyService(FundingAgencyRepository repository, Logger logger) {
+    public FundingAgencyService(FundingAgencyRepository repository, Logger logger, FundingAgencyMapper mapper) {
         this.repository = repository;
         this.logger = logger;
+        this.mapper = mapper;
     }
 
     public List<FundingAgencyDto> getAllFundingAgencies() {
-        return FundingAgencyMapper.toFundingAgencyDto(repository.findAll());
+        return mapper.toTransaction(repository.findAll());
     }
 }

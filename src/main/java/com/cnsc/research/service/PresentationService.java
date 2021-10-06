@@ -39,13 +39,13 @@ public class PresentationService {
 
     public PresentationDto getPresentation(Long presentationId) {
         Optional<Presentation> result = repository.findByPresentationIdAndDeletedIsFalse(presentationId);
-        return result.isPresent() ? mapper.toPresentationDto(result.get()) : null;
+        return result.isPresent() ? mapper.toTransaction(result.get()) : null;
     }
 
     public PresentationSaveResponse addPresentation(PresentationDto presentationDto) throws Exception {
         //the toPresentation mappings will do a database operation.
         //It will search for the existence of the research based on title
-        Presentation presentation = mapper.toPresentation(presentationDto);
+        Presentation presentation = mapper.toDomain(presentationDto);
         String researchTitle = presentation.getResearch().getResearchFile().getTitle();
         PresentationType type = presentation.getType();
         if (repository.existByTitleAndType(researchTitle, type))
@@ -77,12 +77,12 @@ public class PresentationService {
     }
 
     public List<PresentationDto> getPresentations() {
-        return mapper.toPresentationDto(repository.findByDeletedIs(false));
+        return mapper.toTransaction(repository.findByDeletedIs(false));
     }
 
     public String editPresentation(PresentationDto presentationDto) {
         try {
-            Presentation presentation = mapper.toPresentation(presentationDto);
+            Presentation presentation = mapper.toDomain(presentationDto);
             repository.save(presentation);
             return "Publication saved";
         } catch (Exception e) {
