@@ -1,6 +1,5 @@
 package com.cnsc.research.service;
 
-import com.cnsc.research.domain.exception.InvalidCsvFieldException;
 import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.Research;
@@ -10,9 +9,9 @@ import com.cnsc.research.domain.repository.ResearchRepository;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
-import com.cnsc.research.misc.CsvHandler;
 import com.cnsc.research.misc.EntityBuilders;
-import com.opencsv.exceptions.CsvException;
+import com.cnsc.research.misc.fields.ResearchFields;
+import com.cnsc.research.misc.importer.CsvImport;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +52,7 @@ public class ResearchService {
     private String staticDirectory;
 
     private MultipartFile csvFile;
-    private CsvHandler csv;
+    private CsvImport csv;
     private UserDetails currentUser;
 
 
@@ -107,10 +106,10 @@ public class ResearchService {
     }
 
 
-    public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws IOException, InvalidCsvFieldException, CsvException {
+    public List<ResearchDto> getResearchesFromCsv(MultipartFile file) throws Exception {
         this.csvFile = file;
-        csv = new CsvHandler(file.getBytes());
-        return researchMapper.excelToTransactions(csv.getRows(), csv.getRowIndices());
+        csv = new CsvImport<ResearchDto>(file.getBytes(), new ResearchFields());
+        return csv.getMappedData(researchMapper);
     }
 
     private File getPdfFile(String fileName) {

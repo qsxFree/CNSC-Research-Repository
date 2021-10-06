@@ -18,6 +18,16 @@ public class ResearchFields extends ValidFields {
             "remark", Arrays.asList("remark", "remarks", "with moa", "with_moa", "comment", "comments")
     );
 
+    public static final String TITLE_KEY = "title";
+    public static final String RESEARCHER_KEY = "researchers";
+    public static final String DELIVERY_UNIT_KEY = "deliveryUnit";
+    public static final String FUNDING_AGENCY_KEY = "fundingAgency";
+    public static final String BUDGET_KEY = "budget";
+    public static final String START_DATE_KEY = "startDate";
+    public static final String END_DATE_KEY = "endDate";
+    public static final String RESEARCH_STATUS_KEY = "researchStatus";
+    public static final String REMARK_KEY = "remark";
+
     @Override
     protected Map<String, List<String>> getMap() {
         return RESEARCH;

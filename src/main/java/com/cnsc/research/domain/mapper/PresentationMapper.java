@@ -8,14 +8,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static com.cnsc.research.domain.model.PresentationType.*;
 
 @Component
-public class PresentationMapper {
+public class PresentationMapper extends GeneralMapper<Presentation, PresentationDto> {
 
     private final EntityBuilders entityBuilders;
     private final ResearcherMapper researcherMapper;
@@ -28,24 +24,18 @@ public class PresentationMapper {
         this.logger = logger;
     }
 
-    public PresentationDto toPresentationDto(Presentation presentation) {
+    public PresentationDto toTransaction(Presentation presentation) {
         return PresentationDto.builder()
                 .presentationId(presentation.getPresentationId())
                 .presentationDate(presentation.getPresentationDate())
                 .presentationType(presentation.getType().name().toLowerCase())
                 .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
-                .researchers(researcherMapper.toResearchDto(presentation.getResearch().getResearchers()))
+                .researchers(researcherMapper.toTransaction(presentation.getResearch().getResearchers()))
                 .build();
     }
 
-    public List<PresentationDto> toPresentationDto(Collection<Presentation> presentations) {
-        return presentations.stream()
-                .map(this::toPresentationDto)
-                .collect(Collectors.toList());
-    }
 
-
-    public Presentation toPresentation(PresentationDto presentationDto) throws Exception {
+    public Presentation toDomain(PresentationDto presentationDto) throws Exception {
         PresentationType type = null;
         switch (presentationDto.getPresentationType().toLowerCase()) {
             case "local":
@@ -70,17 +60,4 @@ public class PresentationMapper {
                 .build();
     }
 
-    public List<Presentation> toPresentation(Collection<PresentationDto> presentationDtos){
-        return presentationDtos
-                .stream()
-                .map(item -> {
-                    try {
-                        return toPresentation(item);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                })
-                .collect(Collectors.toList());
-    }
 }

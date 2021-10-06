@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResearchDto implements ExcelParsable {
+public class ResearchDto implements Mappable {
 
     private Integer id;
     private List<FundingAgency> fundingAgency;

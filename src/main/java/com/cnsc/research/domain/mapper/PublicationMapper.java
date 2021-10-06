@@ -6,12 +6,8 @@ import com.cnsc.research.domain.transaction.PublicationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
-public class PublicationMapper {
+public class PublicationMapper extends ExtendedMapper<Publication, PublicationDto, ExtendedPublicationDto> {
 
     private final ResearcherMapper researcherMapper;
 
@@ -20,44 +16,28 @@ public class PublicationMapper {
         this.researcherMapper = researcherMapper;
     }
 
-    public  PublicationDto toPublicationDto(Publication publication) {
+    public PublicationDto toTransaction(Publication publication) {
         return new PublicationDto(publication.getPublicationId(),
                 publication.getPublicationTitle(),
                 publication.getPublicationLink());
     }
-    public  List<PublicationDto> toPublicationDto(Collection<Publication> publications){
-        return publications.stream()
-                .map(this::toPublicationDto)
-                .collect(Collectors.toList());
-    }
 
-    public  ExtendedPublicationDto toExtendedPublicationDto(Publication publication){
+    public ExtendedPublicationDto toExtendedTransaction(Publication publication) {
         ExtendedPublicationDto extendedPublicationDto = new ExtendedPublicationDto(publication.getPublicationId(),
                 publication.getPublicationTitle(),
                 publication.getPublicationLink(),
-                researcherMapper.toResearchDto(publication.getResearchers())
+                researcherMapper.toTransaction(publication.getResearchers())
         );
         return extendedPublicationDto;
     }
 
-    public  List<ExtendedPublicationDto> toExtededPublicationDto(Collection<Publication> publications){
-        return publications.stream().map(this::toExtendedPublicationDto)
-                .collect(Collectors.toList());
-    }
-
-    public  Publication toPublication(ExtendedPublicationDto publicationDto){
+    public Publication toDomain(PublicationDto publicationDto) throws Exception {
         return Publication.builder()
                 .publicationId(publicationDto.getPublicationId())
                 .publicationTitle(publicationDto.getPublicationTitle())
                 .publicationLink(publicationDto.getPublicationLink())
-                .researchers(researcherMapper.toResearcher(publicationDto.getResearchers()))
                 .build();
     }
 
-    public  List<Publication> toPublication(Collection<ExtendedPublicationDto> extendedPublicationDtos){
-        return extendedPublicationDtos.stream()
-                .map(this::toPublication)
-                .collect(Collectors.toList());
-    }
 
 }
