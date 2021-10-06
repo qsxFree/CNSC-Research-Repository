@@ -1,5 +1,6 @@
 package com.cnsc.research.domain.mapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,10 +13,12 @@ public abstract class GeneralMapper<D, T> {
       * @param transactionData the transaction data
       * @return the list
       */
-     public List<D> toDomain(Collection<T> transactionData) {
-          return transactionData.stream()
-                  .map(this::toDomain)
-                  .collect(Collectors.toList());
+     public List<D> toDomain(Collection<T> transactionData) throws Exception {
+          List<D> domainList = new ArrayList<>();
+          for (T t : transactionData) {
+               domainList.add(this.toDomain(t));
+          }
+          return domainList;
      }
 
      /**
@@ -35,8 +38,9 @@ public abstract class GeneralMapper<D, T> {
       *
       * @param transactionsData the transactions data
       * @return the d
+      * @throws Exception the exception
       */
-     public abstract D toDomain(T transactionsData);
+     public abstract D toDomain(T transactionsData) throws Exception;
 
      /**
       * To transaction t.

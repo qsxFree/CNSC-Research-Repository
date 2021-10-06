@@ -82,7 +82,7 @@ public abstract class DataImport<T extends Mappable> {
     }
 
 
-    public List<T> getMappedData(DataImportMapper mapper) throws Exception {
+    public List<T> getMappedData(DataImportMapper<?, T> mapper) throws Exception {
         return mapper.dataImportToTransaction(getRawData(), getKeyArrangement());
     }
 }

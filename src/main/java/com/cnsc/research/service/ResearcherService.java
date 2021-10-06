@@ -23,6 +23,6 @@ public class ResearcherService {
     }
 
     public List<ResearchersDto> getAllResearchers() {
-        return mapper.toResearchDto(repository.findAll());
+        return mapper.toTransaction(repository.findAll());
     }
 }
