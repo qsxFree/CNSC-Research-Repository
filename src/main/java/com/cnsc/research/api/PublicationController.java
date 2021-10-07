@@ -1,8 +1,8 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
-import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.domain.transaction.PublicationDto;
+import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.service.PublicationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -61,10 +60,10 @@ public class PublicationController {
     }
 
     @PostMapping("/xls")
-    public List<PublicationDto> uploadCsv(@RequestParam("file")MultipartFile incomingFile){
+    public List<ExtendedPublicationDto> uploadCsv(@RequestParam("file") MultipartFile incomingFile) {
         try {
-            return service.processXls(incomingFile);
-        } catch (IOException e) {
+            return service.getPublicationFromFile(incomingFile);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

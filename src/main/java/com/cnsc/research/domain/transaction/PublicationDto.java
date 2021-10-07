@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PublicationDto {
+public class PublicationDto implements Mappable {
     private Long publicationId;
     private String publicationTitle;
     private String publicationLink;
 }
-

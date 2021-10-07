@@ -8,16 +8,14 @@ import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
-import com.cnsc.research.misc.UploadHandler;
+import com.cnsc.research.misc.fields.PublicationFields;
+import com.cnsc.research.misc.importer.CsvImport;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,9 +32,6 @@ public class PublicationService {
     private final PublicationMapper publicationMapper;
     private final EntityBuilders entityBuilders;
 
-    private UploadHandler uploadHandler;
-    private UserDetails currentUser;
-
     @Autowired
     public PublicationService(PublicationRepository repository,
                               PublicationMapper publicationMapper,
@@ -50,24 +45,26 @@ public class PublicationService {
 
     }
 
-    public PublicationSaveResponse addPublication(PublicationDto publicationDto) {
+    public PublicationSaveResponse addPublication(ExtendedPublicationDto publicationDto) {
         try {
             if (repository.findByPublicationTitleIgnoreCaseAndDeleted(publicationDto.getPublicationTitle(), false).isPresent())
                 return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Already Exist!");
             Publication publication = publicationMapper.toDomain(publicationDto);
 
+            publicationDto.getResearchers().forEach(item -> logger.info("RESEARCHER ----" + item.getResearcherName()));
+
             //REMINDER -- this might cause a performance issue someday.
             // run profiling and change the implementation.
-            List<Researchers> researchers = publication.getResearchers()
+            List<Researchers> researchers = publicationDto.getResearchers()
                     .stream()
-                    .map(item -> entityBuilders.buildResearcher(item.getName()))
+                    .map(item -> entityBuilders.buildResearcher(item.getResearcherName()))
                     .collect(Collectors.toList());
 
             publication.setResearchers(researchers);
             repository.save(publication);
             return new PublicationSaveResponse(publication.getPublicationTitle(), "Saved!");
         } catch (Exception e) {
-            logger.error(format("Error on saving %s", publicationDto.getPublicationId()));
+            logger.error(format("Error on saving \"%s\"", publicationDto.getPublicationTitle()));
             logger.error(e.getMessage());
             return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Error!");
         }
@@ -132,11 +129,8 @@ public class PublicationService {
         return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
     }
 
-    public List<PublicationDto> processXls(MultipartFile incomingFile) throws IOException {
-        currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        uploadHandler = new UploadHandler(currentUser.getUsername());
-        uploadHandler.process(incomingFile);
-        uploadHandler.deleteCachedFile();
-        return List.of(null);
+    public List<ExtendedPublicationDto> getPublicationFromFile(MultipartFile incomingFile) throws Exception {
+        return new CsvImport<ExtendedPublicationDto>(incomingFile.getBytes(), new PublicationFields())
+                .getMappedData(publicationMapper);
     }
 }
