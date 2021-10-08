@@ -28,7 +28,7 @@ public class ResearchController {
         this.logger = logger;
     }
 
-    @PostMapping("/upload-csv")
+    @PostMapping("/import")
     public List<ResearchDto> uploadCsv(@RequestParam("file") MultipartFile file) throws Exception {
         try {
             return service.getResearchesFromCsv(file);

@@ -59,7 +59,7 @@ public class PublicationController {
         return service.deletePublications(idList);
     }
 
-    @PostMapping("/xls")
+    @PostMapping("/import")
     public List<ExtendedPublicationDto> uploadCsv(@RequestParam("file") MultipartFile incomingFile) {
         try {
             return service.getPublicationFromFile(incomingFile);
