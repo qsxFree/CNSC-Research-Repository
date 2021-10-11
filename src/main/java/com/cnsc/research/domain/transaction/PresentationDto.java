@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PresentationDto {
+public class PresentationDto implements Mappable {
     private Long presentationId;
     private String presentationTitle;
     private String presentationType;

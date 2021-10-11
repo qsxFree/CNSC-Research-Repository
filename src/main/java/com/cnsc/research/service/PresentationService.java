@@ -7,10 +7,13 @@ import com.cnsc.research.domain.repository.PresentationRepository;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
+import com.cnsc.research.misc.fields.PresentationFields;
+import com.cnsc.research.misc.importer.CsvImport;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -106,10 +109,14 @@ public class PresentationService {
                     try {
                         return addPresentation(item);
                     } catch (Exception e) {
-                        e.printStackTrace();
                         return new PresentationSaveResponse(item.getPresentationTitle(), "Didn't saved");
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<PresentationDto> getPresentationFromFile(MultipartFile incomingFile) throws Exception {
+        return new CsvImport<PresentationDto>(incomingFile.getBytes(), new PresentationFields())
+                .getMappedData(mapper);
     }
 }

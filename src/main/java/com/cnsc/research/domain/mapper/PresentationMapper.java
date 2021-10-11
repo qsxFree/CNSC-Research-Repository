@@ -4,24 +4,33 @@ import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.misc.EntityBuilders;
+import com.cnsc.research.misc.fields.PresentationFields;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static com.cnsc.research.domain.model.PresentationType.*;
 
 @Component
-public class PresentationMapper extends GeneralMapper<Presentation, PresentationDto> {
+public class PresentationMapper extends GeneralMapper<Presentation, PresentationDto> implements DataImportMapper<Presentation, PresentationDto> {
 
     private final EntityBuilders entityBuilders;
     private final ResearcherMapper researcherMapper;
     private final Logger logger;
+    private final DateTimeFormatter formatter;
 
     @Autowired
-    public PresentationMapper(EntityBuilders entityBuilders, ResearcherMapper researcherMapper, Logger logger) {
+    public PresentationMapper(EntityBuilders entityBuilders, ResearcherMapper researcherMapper, Logger logger, DateTimeFormatter formatter) {
         this.entityBuilders = entityBuilders;
         this.researcherMapper = researcherMapper;
         this.logger = logger;
+        this.formatter = formatter;
     }
 
     public PresentationDto toTransaction(Presentation presentation) {
@@ -60,4 +69,20 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
                 .build();
     }
 
+    @Override
+    public PresentationDto dataImportToTransaction(String[] cellData, Map<String, Integer> keyArrangement) {
+        return new PresentationDto(null,
+                cellData[keyArrangement.get(PresentationFields.TITLE_KEY)],
+                cellData[keyArrangement.get(PresentationFields.TYPE_KEY)],
+                null,
+                LocalDate.from(formatter.parse(cellData[keyArrangement.get(PresentationFields.DATE_KEY)].trim()))
+        );
+    }
+
+    @Override
+    public List<PresentationDto> dataImportToTransaction(List<String[]> rowData, Map<String, Integer> keyArrangement) {
+        return rowData.stream()
+                .map(csvRow -> this.dataImportToTransaction(csvRow, keyArrangement))
+                .collect(Collectors.toList());
+    }
 }
