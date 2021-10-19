@@ -4,11 +4,13 @@ import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.ResearchFile;
+import com.cnsc.research.domain.model.ResearchStatus;
 import com.cnsc.research.domain.repository.ResearchFileRepository;
 import com.cnsc.research.domain.repository.ResearchRepository;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
+import com.cnsc.research.domain.transaction.ResearchQueryBuilder;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import com.cnsc.research.misc.importer.CsvImport;
@@ -28,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -222,5 +225,54 @@ public class ResearchService {
     public List<ResearchDto> getResearches() {
         List<Research> researches = researchRepository.findByDeletedIsFalse();
         return researchMapper.toTransaction(researches);
+    }
+
+    public Double getMaxBudget() {
+        return researchRepository.getMaxBudget();
+    }
+
+    public List<ResearchDto> getResearchByTitle(String title) {
+        return researchMapper.toTransaction(researchRepository.findByResearchFile_TitleIsContainingIgnoreCaseAndDeletedIsFalse(title));
+    }
+
+    public List<ResearchDto> getResearchByAdvancedFilter(ResearchQueryBuilder queryBuilder) {
+        Double budgetStart = null, budgetEnd = null;
+        LocalDate startDate = null, endDate = null;
+        List<ResearchStatus> status = null;
+        if (queryBuilder.getBudget() != null) {
+            budgetStart = queryBuilder.getBudget().get(0);
+            budgetEnd = queryBuilder.getBudget().get(1);
+        }
+
+        if (queryBuilder.getDate() != null) {
+            startDate = queryBuilder.getDate().get(0);
+            endDate = queryBuilder.getDate().get(1);
+        }
+
+        if (queryBuilder.getStatus() != null) {
+            status = queryBuilder.getStatus().stream().map(item -> {
+                ResearchStatus stat = ResearchStatus.NEW;
+                switch (item.toLowerCase()) {
+                    case "new":
+                        stat = ResearchStatus.NEW;
+                        break;
+                    case "approved":
+                        stat = ResearchStatus.APPROVED;
+                        break;
+                    case "completed":
+                        stat = ResearchStatus.COMPLETED;
+                        break;
+                }
+                return stat;
+            }).collect(Collectors.toList());
+        }
+        List<Research> result = researchRepository.findAdvanced(budgetStart, budgetEnd, startDate, endDate,
+                queryBuilder.getAgency(),
+                queryBuilder.getUnit(),
+                queryBuilder.getResearchers(),
+                status
+        );
+        result.forEach(item -> logger.info(item.toString()));
+        return researchMapper.toTransaction(result);
     }
 }

@@ -4,6 +4,7 @@ import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
+import com.cnsc.research.domain.transaction.ResearchQueryBuilder;
 import com.cnsc.research.service.ResearchService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,10 @@ public class ResearchController {
     }
 
     @PostMapping("/pdf")
-    public String uploadPdf(@RequestParam(name = "id", defaultValue = "0") Integer id, @RequestParam("title") String title, @RequestParam("file") MultipartFile file) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
+    public String uploadPdf(@RequestParam(name = "id", defaultValue = "0") Integer id,
+                            @RequestParam("title") String title,
+                            @RequestParam("file") MultipartFile file)
+            throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
         return service.processPdf(id, title, file);
     }
 
@@ -86,8 +90,25 @@ public class ResearchController {
     }
 
     @GetMapping("/list")
-    public List<ResearchDto> getResearches(){
+    public List<ResearchDto> getResearches() {
         return service.getResearches();
+    }
+
+    @GetMapping("/list/search")
+    public List<ResearchDto> getResearchByTitle(@RequestParam(defaultValue = "", required = false) String title,
+                                                @RequestBody(required = false) ResearchQueryBuilder queryBuilder
+    ) {
+        if (!title.equals("")) {
+            return service.getResearchByTitle(title);
+        } else {
+            return service.getResearchByAdvancedFilter(queryBuilder);
+        }
+
+    }
+
+    @GetMapping("/budget/max")
+    public Double getMaxBudget() {
+        return service.getMaxBudget();
     }
 
 
