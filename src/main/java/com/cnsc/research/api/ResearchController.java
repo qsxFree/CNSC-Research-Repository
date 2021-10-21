@@ -95,15 +95,13 @@ public class ResearchController {
     }
 
     @GetMapping("/list/search")
-    public List<ResearchDto> getResearchByTitle(@RequestParam(defaultValue = "", required = false) String title,
-                                                @RequestBody(required = false) ResearchQueryBuilder queryBuilder
-    ) {
-        if (!title.equals("")) {
-            return service.getResearchByTitle(title);
-        } else {
-            return service.getResearchByAdvancedFilter(queryBuilder);
-        }
+    public List<ResearchDto> getResearchByTitle(@RequestParam(required = true) String title) {
+        return service.getResearchByTitle(title);
+    }
 
+    @PostMapping("/list/search")
+    public List<ResearchDto> getResearchAdvanced(@RequestBody ResearchQueryBuilder queryBuilder) {
+        return service.getResearchByAdvancedFilter(queryBuilder);
     }
 
     @GetMapping("/budget/max")

@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -18,7 +17,6 @@ import java.util.Optional;
 
 @Repository
 public interface ResearchRepository extends JpaRepository<Research, Integer> {
-    Optional<Research> findByResearchFile_TitleIgnoreCase(@NonNull String title);
 
     Page<Research> findByDeletedFalse(Pageable pageable);
 
@@ -31,10 +29,10 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
     List<Research> findByResearchFile_TitleIsContainingIgnoreCaseAndDeletedIsFalse(@NonNull String title);
 
 
-    @Query(value = "select r from Research r " +
+    @Query(value = "select distinct(r) from Research r " +
             " left join r.fundingAgencies fundingAgencies " +
             " left join r.researchers researchers " +
-            " where (:budgetStart is null or :budgetEnd is null or  r.budget between :budgetStart and :budgetEnd )" +
+            " where  ( r.budget >= :budgetStart and r.budget <= :budgetEnd) " +
             " and (:startDate is null or r.startDate >= :startDate) " +
             " and (:endDate is null or r.endDate <= :endDate) " +
             " and (coalesce(:agencyNames) is null or fundingAgencies.agencyName in (:agencyNames)) " +
@@ -53,10 +51,6 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
 
     List<Research> findByDeletedIsFalse();
-
-    @Query("select r from Research r left join r.fundingAgencies fundingAgencies left join r.researchers researchers where r.budget between ?1 and ?2 and r.startDate >= ?3 and r.endDate <= ?4 and fundingAgencies.agencyName in ?5 and r.deliveryUnit.unitName in ?6 and researchers.name in ?7 and r.researchStatus in ?8")
-    List<Research> advanceSearch(@Nullable Double budgetStart, @Nullable Double budgetEnd, @Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Collection<String> agencyNames, @Nullable Collection<String> unitNames, @Nullable Collection<String> names, @Nullable Collection<ResearchStatus> researchStatuses);
-
 
     @Query("select max(r.budget) from Research r")
     Double getMaxBudget();

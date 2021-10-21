@@ -15,10 +15,10 @@ import java.util.List;
 @Builder
 public class ResearchQueryBuilder {
 
-     private List<String> agency;
-     private List<Double> budget;
-     private List<LocalDate> date;
-     private List<String> researchers;
-     private List<String> status;
-     private List<String> unit;
+     private List<String> agency = null;
+     private List<Double> budget = null;
+     private List<LocalDate> date = null;
+     private List<String> researchers = null;
+     private List<String> status = null;
+     private List<String> unit = null;
 }

@@ -243,7 +243,7 @@ public class ResearchService {
             budgetStart = queryBuilder.getBudget().get(0);
             budgetEnd = queryBuilder.getBudget().get(1);
         }
-
+        //logger.info(format("Start %s ---- End %s",budgetStart.toString(),budgetEnd.toString() ));
         if (queryBuilder.getDate() != null) {
             startDate = queryBuilder.getDate().get(0);
             endDate = queryBuilder.getDate().get(1);
@@ -266,13 +266,14 @@ public class ResearchService {
                 return stat;
             }).collect(Collectors.toList());
         }
-        List<Research> result = researchRepository.findAdvanced(budgetStart, budgetEnd, startDate, endDate,
+        List<Research> result = researchRepository.findAdvanced(
+                budgetStart, budgetEnd,
+                startDate, endDate,
                 queryBuilder.getAgency(),
                 queryBuilder.getUnit(),
                 queryBuilder.getResearchers(),
                 status
         );
-        result.forEach(item -> logger.info(item.toString()));
         return researchMapper.toTransaction(result);
     }
 }
