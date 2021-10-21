@@ -2,6 +2,7 @@ package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationDto;
+import com.cnsc.research.domain.transaction.PublicationQueryBuilder;
 import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.service.PublicationService;
 import org.slf4j.Logger;
@@ -55,8 +56,18 @@ public class PublicationController {
     }
 
     @DeleteMapping("/list")
-    public ResponseEntity deletePublications(@RequestBody List<Long> idList){
+    public ResponseEntity deletePublications(@RequestBody List<Long> idList) {
         return service.deletePublications(idList);
+    }
+
+    @GetMapping("/list/search")
+    public List<ExtendedPublicationDto> getPublicationByTitle(@RequestParam String title) {
+        return service.getPublicationByTitle(title);
+    }
+
+    @PostMapping("/list/search")
+    public List<ExtendedPublicationDto> getPublicationAdvanced(@RequestBody PublicationQueryBuilder queryBuilder) {
+        return service.getRPublicationByAdvancedFilter(queryBuilder);
     }
 
     @PostMapping("/import")

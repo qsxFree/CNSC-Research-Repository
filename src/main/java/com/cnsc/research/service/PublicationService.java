@@ -6,6 +6,7 @@ import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.repository.PublicationRepository;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationDto;
+import com.cnsc.research.domain.transaction.PublicationQueryBuilder;
 import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.PublicationFields;
@@ -132,5 +133,13 @@ public class PublicationService {
     public List<ExtendedPublicationDto> getPublicationFromFile(MultipartFile incomingFile) throws Exception {
         return new CsvImport<ExtendedPublicationDto>(incomingFile.getBytes(), new PublicationFields())
                 .getMappedData(publicationMapper);
+    }
+
+    public List<ExtendedPublicationDto> getPublicationByTitle(String title) {
+        return publicationMapper.toExtendedTransaction(repository.findByPublicationTitleIsContainingIgnoreCaseAndDeletedIsFalse(title));
+    }
+
+    public List<ExtendedPublicationDto> getRPublicationByAdvancedFilter(PublicationQueryBuilder queryBuilder) {
+        return publicationMapper.toExtendedTransaction(repository.findAdvanced(queryBuilder.getResearchers()));
     }
 }
