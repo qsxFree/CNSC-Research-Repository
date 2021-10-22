@@ -1,6 +1,5 @@
 package com.cnsc.research.service;
 
-import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.ResearchFile;
@@ -14,9 +13,9 @@ import com.cnsc.research.domain.transaction.ResearchQueryBuilder;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import com.cnsc.research.misc.importer.CsvImport;
+import com.cnsc.research.misc.storage.AzureStorageUtility;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,9 +45,8 @@ public class ResearchService {
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilder;
+    private final AzureStorageUtility storageUtility;
 
-    @Value("${static-directory}")
-    private String staticDirectory;
 
     private MultipartFile csvFile;
     private CsvImport csv;
@@ -62,13 +57,15 @@ public class ResearchService {
                            ResearchFileRepository researchFileRepository,
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
-                           EntityBuilders entityBuilder
+                           EntityBuilders entityBuilder,
+                           AzureStorageUtility storageUtility
     ) {
         this.entityBuilder = entityBuilder;
         this.logger = logger;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
         this.researchMapper = researchMapper;
+        this.storageUtility = storageUtility;
     }
 
     public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
@@ -113,31 +110,16 @@ public class ResearchService {
         return csv.getMappedData(researchMapper);
     }
 
-    private File getPdfFile(String fileName) {
-        String newName = fileName.replaceAll(" ", "-");
-        newName = newName.replaceAll("[./\\:?*\"|]", "");
-        return new File(staticDirectory + "pdf/" + newName + ".pdf");
-    }
 
-    //TODO find a solution for pdf caching to avoid duplicates on upload
-    public String processPdf(Integer id, String title, MultipartFile pdfFile) throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
-        //currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        File file = getPdfFile(title);
-        if (!pdfFile.getOriginalFilename().endsWith(".pdf"))
-            throw new InvalidFileFormat(format("%s is not a pdf file"));
-
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-            logger.info("Saving PDF file ...");
-            fileOutputStream.write(pdfFile.getBytes());
-
-        } catch (FileNotFoundException e) {
-            throw e;
+    public String processPdf(MultipartFile pdfFile) {
+        String fileName = "" + System.currentTimeMillis();
+        try {
+            storageUtility.inContainer(AzureStorageUtility.PDF_CONTAINER)
+                    .upload(pdfFile.getBytes(), fileName + ".pdf");
+            return fileName;
         } catch (IOException e) {
-            logger.info(format("Error in writing pdf file to static directory"));
-            e.printStackTrace();
+            throw new RuntimeException("Error on writing pdf", e);
         }
-        logger.info("File saved!");
-        return file.getName().replace(".pdf", "");
     }
 
     public ResearchBatchQueryResponse getAllResearches(int page, int size, String sortBy) {
@@ -186,7 +168,7 @@ public class ResearchService {
     }
 
     public String deletePdf(String title) {
-        File file = getPdfFile(title);
+        File file = null;
         String fileName = file.getName().replace(".pdf", "");
         Optional<ResearchFile> researchFile = researchFileRepository.findByResearchTitleAndAvailabiity(title);
         if (file.exists()) file.delete();

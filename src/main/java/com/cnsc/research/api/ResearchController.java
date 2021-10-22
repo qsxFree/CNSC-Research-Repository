@@ -1,6 +1,5 @@
 package com.cnsc.research.api;
 
-import com.cnsc.research.domain.exception.InvalidFileFormat;
 import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
@@ -12,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 @RestController
@@ -36,15 +33,11 @@ public class ResearchController {
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-
     }
 
     @PostMapping("/pdf")
-    public String uploadPdf(@RequestParam(name = "id", defaultValue = "0") Integer id,
-                            @RequestParam("title") String title,
-                            @RequestParam("file") MultipartFile file)
-            throws FileNotFoundException, InvalidFileFormat, FileAlreadyExistsException {
-        return service.processPdf(id, title, file);
+    public String uploadPdf(@RequestParam("file") MultipartFile file) {
+        return service.processPdf(file);
     }
 
     @DeleteMapping("/pdf")
