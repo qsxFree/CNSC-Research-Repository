@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * The type Research mapper.
  */
 @Component
-public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
+public class ResearchMapper extends GeneralMapper<Research, ResearchDto> implements DataImportMapper<Research, ResearchDto> {
 
     private final DateTimeFormatter formatter;
 
@@ -31,6 +31,7 @@ public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
         this.formatter = formatter;
     }
 
+    @Override
     public ResearchDto toTransaction(Research research) {
         int id = research.getResearchId();
         double budget = research.getBudget();
@@ -81,6 +82,7 @@ public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
         );
     }
 
+    @Override
     public Research toDomain(ResearchDto researchDto) {
         Research research = new Research();
 
@@ -140,6 +142,7 @@ public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
         return research;
     }
 
+    @Override
     public ResearchDto dataImportToTransaction(String[] csvRow, Map<String, Integer> keyArrangement) {
         String[] researchers = csvRow[keyArrangement.get(ResearchFields.RESEARCHER_KEY)].split(",");
         String[] fundingAgency = csvRow[keyArrangement.get(ResearchFields.FUNDING_AGENCY_KEY)].split(",");
@@ -176,6 +179,12 @@ public class ResearchMapper extends DataImportMapper<Research, ResearchDto> {
 
     }
 
+    @Override
+    public List<ResearchDto> dataImportToTransaction(List<String[]> rowData, Map<String, Integer> keyArrangement) {
+        return rowData.stream()
+                .map(csvRow -> this.dataImportToTransaction(csvRow, keyArrangement))
+                .collect(Collectors.toList());
+    }
 
 
 }

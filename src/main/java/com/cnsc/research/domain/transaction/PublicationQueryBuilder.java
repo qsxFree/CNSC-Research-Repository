@@ -5,12 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PublicationDto implements Mappable {
-    private Long publicationId;
-    private String publicationTitle;
-    private String publicationLink;
+public class PublicationQueryBuilder {
+
+    private List<String> researchers = null;
 }

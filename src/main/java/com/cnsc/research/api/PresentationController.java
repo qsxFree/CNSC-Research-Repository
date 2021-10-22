@@ -1,12 +1,14 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.PresentationDto;
+import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
 import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.service.PresentationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -54,12 +56,32 @@ public class PresentationController {
     }
 
     @GetMapping("/list")
-    public List<PresentationDto> getPresentations(){
+    public List<PresentationDto> getPresentations() {
         return service.getPresentations();
     }
 
     @DeleteMapping("/list")
-    public ResponseEntity deletePublications(@RequestBody List<Long> idList){
+    public ResponseEntity deletePublications(@RequestBody List<Long> idList) {
         return service.deletePresentations(idList);
+    }
+
+    @GetMapping("/list/search")
+    public List<PresentationDto> getPresentationByTitle(@RequestParam String title) {
+        return service.getPresentationByTitle(title);
+    }
+
+    @PostMapping("/list/search")
+    public List<PresentationDto> getPresentationAdvanced(@RequestBody PresentationQueryBuilder queryBuilder) {
+        return service.getPresentationByAdvancedFilter(queryBuilder);
+    }
+
+    @PostMapping("/import")
+    public List<PresentationDto> uploadCsv(@RequestParam("file") MultipartFile incomingFile) {
+        try {
+            return service.getPresentationFromFile(incomingFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

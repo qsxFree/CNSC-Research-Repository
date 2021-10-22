@@ -12,12 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PresentationDto implements Mappable {
-    private Long presentationId;
-    private String presentationTitle;
-    private String presentationType;
-    private List<ResearchersDto> researchers;
-    private LocalDate presentationDate;
-
-
+public class PresentationQueryBuilder {
+    private List<String> researchers = null;
+    private List<LocalDate> date = null;
+    private List<String> type = null;
 }

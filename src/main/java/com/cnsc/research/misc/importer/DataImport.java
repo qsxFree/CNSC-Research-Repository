@@ -64,6 +64,7 @@ public abstract class DataImport<T extends Mappable> {
         keyArrangement = Map.copyOf(tempKeyArrangementAllocator);
 
         if (rawFields.length != keyArrangement.size()) {
+            logger.error("Field validation failed");
             close();
             throw new InvalidFieldCountException("invalid field size");
         }
@@ -83,6 +84,8 @@ public abstract class DataImport<T extends Mappable> {
 
 
     public List<T> getMappedData(DataImportMapper<?, T> mapper) throws Exception {
-        return mapper.dataImportToTransaction(getRawData(), getKeyArrangement());
+        List<T> mappedData = mapper.dataImportToTransaction(getRawData(), getKeyArrangement());
+        close();
+        return mappedData;
     }
 }

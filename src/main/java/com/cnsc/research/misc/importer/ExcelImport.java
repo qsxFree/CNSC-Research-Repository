@@ -44,7 +44,9 @@ public class ExcelImport<T extends Mappable> extends DataImport<T> {
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
             if (cell.getCellType() == CellType.STRING) fields.add(cell.getStringCellValue().toLowerCase().trim());
+            else if (cell.getCellType() == CellType.BLANK) break;
             else {
+                logger.error("Field Validation failed");
                 close();
                 throw new InvalidExcelCellType("Invalid cell type");
             }
@@ -56,9 +58,9 @@ public class ExcelImport<T extends Mappable> extends DataImport<T> {
     @Override
     public List<String[]> getRawData() {
         List<String[]> result = new ArrayList<>();
-        Iterator<Row> rowIterator = sheet.iterator();
+        Iterator<Row> rowIterator = sheet.rowIterator();
         rowIterator.forEachRemaining((row) -> {
-            Iterator<Cell> cellIterator = row.iterator();
+            Iterator<Cell> cellIterator = row.cellIterator();
             List<String> rowValues = new ArrayList<>();
             cellIterator.forEachRemaining((cell -> {
                 switch (cell.getCellType()) {
@@ -72,11 +74,11 @@ public class ExcelImport<T extends Mappable> extends DataImport<T> {
                         rowValues.add(String.valueOf(cell.getBooleanCellValue()));
                         break;
                     default:
-                        rowValues.add("");
                         break;
                 }
             }));
-            result.add(rowValues.toArray(new String[0]));
+            if (rowValues.size() > 0)
+                result.add(rowValues.toArray(new String[0]));
         });
         return result;
     }
