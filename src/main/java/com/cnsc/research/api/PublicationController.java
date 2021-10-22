@@ -67,7 +67,7 @@ public class PublicationController {
 
     @PostMapping("/list/search")
     public List<ExtendedPublicationDto> getPublicationAdvanced(@RequestBody PublicationQueryBuilder queryBuilder) {
-        return service.getRPublicationByAdvancedFilter(queryBuilder);
+        return service.getPublicationByAdvancedFilter(queryBuilder);
     }
 
     @PostMapping("/import")

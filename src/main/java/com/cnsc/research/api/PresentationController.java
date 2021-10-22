@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.PresentationDto;
+import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
 import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.service.PresentationService;
 import org.slf4j.Logger;
@@ -62,6 +63,16 @@ public class PresentationController {
     @DeleteMapping("/list")
     public ResponseEntity deletePublications(@RequestBody List<Long> idList) {
         return service.deletePresentations(idList);
+    }
+
+    @GetMapping("/list/search")
+    public List<PresentationDto> getPresentationByTitle(@RequestParam String title) {
+        return service.getPresentationByTitle(title);
+    }
+
+    @PostMapping("/list/search")
+    public List<PresentationDto> getPresentationAdvanced(@RequestBody PresentationQueryBuilder queryBuilder) {
+        return service.getPresentationByAdvancedFilter(queryBuilder);
     }
 
     @PostMapping("/import")

@@ -139,7 +139,7 @@ public class PublicationService {
         return publicationMapper.toExtendedTransaction(repository.findByPublicationTitleIsContainingIgnoreCaseAndDeletedIsFalse(title));
     }
 
-    public List<ExtendedPublicationDto> getRPublicationByAdvancedFilter(PublicationQueryBuilder queryBuilder) {
+    public List<ExtendedPublicationDto> getPublicationByAdvancedFilter(PublicationQueryBuilder queryBuilder) {
         return publicationMapper.toExtendedTransaction(repository.findAdvanced(queryBuilder.getResearchers()));
     }
 }
