@@ -40,6 +40,8 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         String remarks = research.getRemarks();
         String researchTitle = research.getResearchFile().getTitle();
         String researchStatus = research.getResearchStatus().name();
+        boolean isPublic = research.isPublic();
+        String agenda = research.getAgenda();
 
         List<ResearchDto.FundingAgency> agencies = research.getFundingAgencies().stream()
                 .map(data -> ResearchDto
@@ -78,7 +80,10 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 deliveryUnit,
                 remarks,
                 researchers,
-                researchFile
+                researchFile,
+                isPublic,
+                agenda
+
         );
     }
 
@@ -92,6 +97,9 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         research.setEndDate(researchDto.getEndDate());
         research.setRemarks(researchDto.getRemarks());
         research.setDeleted(false);
+        System.out.println(researchDto.getIsPublic());
+        research.setPublic(researchDto.getIsPublic());
+        research.setAgenda(researchDto.getAgenda());
 
 
         switch (researchDto.getResearchStatus().toLowerCase()) {
@@ -174,7 +182,9 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 ResearchDto.DeliveryUnit.builder().unitName(csvRow[keyArrangement.get(ResearchFields.DELIVERY_UNIT_KEY)]).build(),
                 csvRow[keyArrangement.get(ResearchFields.REMARK_KEY)],
                 researcherList,
-                ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get(ResearchFields.TITLE_KEY)]).build()
+                ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get(ResearchFields.TITLE_KEY)]).build(),
+                false,//TODO fix the mapping for import
+                null
         );
 
     }
