@@ -5,13 +5,15 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.azure.storage.common.StorageSharedKeyCredential;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+@Component
 public class AzureStorageUtility {
-
+    public static final String PDF_CONTAINER = "pdf";
     private final BlobServiceClient blobServiceClient;
     private BlobContainerClient blobContainerClient;
 

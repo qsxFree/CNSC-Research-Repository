@@ -32,6 +32,12 @@ public class Research {
     @Column(name = "remarks", length = 300)
     private String remarks;
 
+    @Column(name = "is_public")
+    private boolean isPublic;
+
+    @Column(name = "agenda")
+    private String agenda;
+
     @Column(name = "deleted")
     private boolean deleted;
 
