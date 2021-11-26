@@ -49,5 +49,5 @@ jobs:
         with:
           app-name: 'cnsc-research-repository'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AA4C2D4189C24F5685DA5D1017FC3C13 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AD45E36D457B4C7FB13AF2FA7EC2D0C1 }}
           package: '*.jar'
