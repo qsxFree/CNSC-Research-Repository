@@ -6,6 +6,11 @@ import org.springframework.lang.NonNull;
 
 import java.util.Optional;
 
-public interface ResearchersRepository extends JpaRepository<Researchers,Integer> {
+public interface ResearchersRepository extends JpaRepository<Researchers, Integer> {
     Optional<Researchers> findByNameIgnoreCase(@NonNull String name);
+
+    boolean existsByNameAndDeletedIsFalseAllIgnoreCase(String name);
+
+    Optional<Researchers> findByResearcherIdAndDeletedIsFalse(Integer researcherId);
+
 }

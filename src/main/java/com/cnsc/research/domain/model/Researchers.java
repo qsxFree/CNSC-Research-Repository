@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -24,9 +25,18 @@ public class Researchers {
     @Column(name = "name", nullable = false, length = 250)
     private String name;
 
+    @Column(name = "date_created", updatable = false, insertable = false)
+    private LocalDateTime dateCreated;
+
+    @Column(name = "date_removed")
+    private LocalDateTime dateRemoved;
+
+    @Column(name = "deleted", insertable = false)
+    private boolean deleted;
+
     @ManyToMany(mappedBy = "researchers", fetch = FetchType.LAZY)
     private Set<Research> researches;
 
-    @ManyToMany(mappedBy = "researchers",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "researchers", fetch = FetchType.LAZY)
     private List<Publication> publications;
 }
