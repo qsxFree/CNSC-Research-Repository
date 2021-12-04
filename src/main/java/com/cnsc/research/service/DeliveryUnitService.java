@@ -80,10 +80,10 @@ public class DeliveryUnitService {
         try {
             long referenceCount = referenceCount(id);
             if (referenceCount <= 0) {
-                researchRepository.deleteById(id);
+                deliveryUnitRepository.deleteById(id);
                 return new ResponseEntity<String>("Delete success", OK);
             } else {
-                return new ResponseEntity<String>("The delivery is referenced to " + referenceCount + " researches.", BAD_REQUEST);
+                return new ResponseEntity<String>("The delivery unit is referenced to " + referenceCount + " researches.", BAD_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -57,7 +57,15 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     long countByDeliveryUnit_UnitId(Integer unitId);
 
+    long countByFundingAgencies_AgencyId(Integer agencyId);
+
+    long countByResearchers_ResearcherId(Integer researcherId);
+
     List<Research> findByDeliveryUnit_UnitIdAndDeletedIsFalse(Integer unitId);
+
+    List<Research> findByFundingAgencies_AgencyIdAndDeletedIsFalse(Integer agencyId);
+
+    List<Research> findByResearchers_ResearcherIdAndDeletedIsFalse(Integer researcherId);
 
 
 }

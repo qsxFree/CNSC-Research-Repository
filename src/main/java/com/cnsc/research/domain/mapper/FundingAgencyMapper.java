@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class FundingAgencyMapper extends GeneralMapper<FundingAgency, FundingAgencyDto> {
     @Override
     public FundingAgency toDomain(FundingAgencyDto transactionsData) throws Exception {
-        return null;
+        return new FundingAgency(transactionsData.getAgencyId(), transactionsData.getAgencyName(), null);
     }
 
     public FundingAgencyDto toTransaction(FundingAgency fundingAgency) {
