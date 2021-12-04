@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class UserMapper extends GeneralMapper<User, UserDto> {
 
     public UserDto toTransaction(User user) {
-        return new UserDto(user.getId(), user.getUsername(), user.getName());
+        return new UserDto(user.getId(), user.getUsername(), user.getName(), user.getRole());
     }
 
     @Override
