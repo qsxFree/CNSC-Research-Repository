@@ -54,4 +54,10 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     @Query("select max(r.budget) from Research r")
     Double getMaxBudget();
+
+    long countByDeliveryUnit_UnitId(Integer unitId);
+
+    List<Research> findByDeliveryUnit_UnitIdAndDeletedIsFalse(Integer unitId);
+
+
 }
