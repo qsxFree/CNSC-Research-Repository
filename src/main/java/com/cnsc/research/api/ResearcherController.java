@@ -27,22 +27,27 @@ public class ResearcherController {
     }
 
     @PostMapping
-    public String saveResearcher(@RequestBody ResearchersDto researchersDto) {
+    public ResponseEntity addResearcher(@RequestBody ResearchersDto researchersDto) {
         return service.saveResearcher(researchersDto);
     }
 
     @PutMapping
-    public String editResearcher(@RequestBody ResearchersDto researchersDto) {
+    public ResponseEntity editResearcher(@RequestBody ResearchersDto researchersDto) {
         return service.updateResearcher(researchersDto);
     }
 
-    @DeleteMapping("/{id}/")
-    public String deleteResearcher(@PathVariable(name = "id") Integer researcherId) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteResearcher(@PathVariable(name = "id") Integer researcherId) {
         return service.deleteResearcher(researcherId);
     }
 
-    @GetMapping("/{id}/")
+    @GetMapping("/{id}")
     public ResponseEntity getResearcher(@PathVariable(name = "id") Integer researcherId) {
         return service.getResearcher(researcherId);
+    }
+
+    @GetMapping("/{id}/research/list")
+    public ResponseEntity getResearches(@PathVariable(name = "id") Integer id) {
+        return service.getResearches(id);
     }
 }
