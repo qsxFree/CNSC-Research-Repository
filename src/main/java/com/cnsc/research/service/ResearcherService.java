@@ -77,14 +77,18 @@ public class ResearcherService {
         try {
             long referenceCount = referenceCount(researcherId);
             Optional<Researchers> researchersOptional = repository.findByResearcherIdAndDeletedIsFalse(researcherId);
-            if (researchersOptional.isPresent() || referenceCount <= 0) {
-                Researchers researcher = researchersOptional.get();
-                researcher.setDeleted(true);
-                researcher.setDateRemoved(LocalDateTime.now());
-                repository.save(researcher);
-                return new ResponseEntity<String>(format("Researcher %s has successfully deleted", researcher.getName()), OK);
+            if (researchersOptional.isPresent() && referenceCount <= 0) {
+                if (researchersOptional.isPresent()) {
+                    Researchers researcher = researchersOptional.get();
+                    researcher.setDeleted(true);
+                    researcher.setDateRemoved(LocalDateTime.now());
+                    repository.save(researcher);
+                    return new ResponseEntity<String>(format("Researcher %s has successfully deleted", researcher.getName()), OK);
+                } else {
+                    return new ResponseEntity<String>("Cannot delete researcher", BAD_REQUEST);
+                }
             } else {
-                return new ResponseEntity<String>("Cannot delete researcher", BAD_REQUEST);
+                return new ResponseEntity<String>("The researcher is referenced to " + referenceCount + " researches.", BAD_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();
