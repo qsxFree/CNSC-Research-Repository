@@ -28,13 +28,22 @@ public class Presentation {
     @Column(name = "presentation_date")
     private LocalDate presentationDate;
 
+    @Column(name = "is_private")
+    private boolean isPrivate;
+
+    @Column(name = "event_name")
+    private String eventName;
+
+    @Column(name = "organizing_agency")
+    private String organizingAgency;
+
+    @Column(name = "deleted")
     private boolean deleted;
 
-    @Transient
-    @Column(name = "datetime_added")
+    @Column(name = "datetime_added", insertable = false, updatable = false)
     private LocalDateTime dateTimeAdded;
 
-    @Column(name = "datetime_removed")
+    @Column(name = "datetime_removed", insertable = false)
     private LocalDateTime dateTimeDeleted;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

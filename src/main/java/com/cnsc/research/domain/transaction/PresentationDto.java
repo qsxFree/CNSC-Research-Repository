@@ -18,6 +18,7 @@ public class PresentationDto implements Mappable {
     private String presentationType;
     private List<ResearchersDto> researchers;
     private LocalDate presentationDate;
-
-
+    private String organizingAgency;
+    private boolean isPrivate;
+    private String eventName;
 }
