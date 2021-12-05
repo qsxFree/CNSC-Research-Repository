@@ -1,12 +1,16 @@
 package com.cnsc.research.domain.model;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.cnsc.research.domain.model.Role.EDITOR;
@@ -14,7 +18,10 @@ import static com.cnsc.research.domain.model.Role.SUPER_ADMIN;
 
 @Entity
 @Table(name = "user")
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements UserDetails {
     @Id
     @Column(name = "user_id", nullable = false)
@@ -27,6 +34,9 @@ public class User implements UserDetails {
     private String access;
     private String role;
     private boolean deleted;
+
+    @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
+    private List<Notification> notificationList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
