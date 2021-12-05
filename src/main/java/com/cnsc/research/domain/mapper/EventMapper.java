@@ -10,6 +10,7 @@ public class EventMapper extends GeneralMapper<Event, EventDto> {
     public Event toDomain(EventDto transactionsData) throws Exception {
         Event event = new Event();
         event.setId(transactionsData.getEventId());
+        event.setPrivate(transactionsData.isPrivate());
         event.setEventName(transactionsData.getEventName());
         event.setEventType(transactionsData.getEventType());
         event.setEventDatetime(transactionsData.getEventDatetime());
@@ -21,6 +22,7 @@ public class EventMapper extends GeneralMapper<Event, EventDto> {
         return EventDto.builder()
                 .eventId(domainData.getId())
                 .eventName(domainData.getEventName())
+                .isPrivate(domainData.isPrivate())
                 .eventType(domainData.getEventType())
                 .eventDatetime(domainData.getEventDatetime())
                 .build();

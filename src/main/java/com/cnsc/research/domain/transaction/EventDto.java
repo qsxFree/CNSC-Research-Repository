@@ -14,5 +14,6 @@ public class EventDto {
     private Long eventId;
     private String eventName;
     private String eventType;
+    private boolean isPrivate;
     private LocalDateTime eventDatetime;
 }
