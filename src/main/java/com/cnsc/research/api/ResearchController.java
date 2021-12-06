@@ -61,7 +61,7 @@ public class ResearchController {
     }
 
     @GetMapping("/{id}")
-    public ResearchDto getResearch(@PathVariable(name = "id") Integer researchId) throws Exception {
+    public ResponseEntity getResearch(@PathVariable(name = "id") Integer researchId) {
         return service.getResearch(researchId);
     }
 

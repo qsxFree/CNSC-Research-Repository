@@ -35,10 +35,7 @@ public class Research {
     @Column(name = "is_public")
     private boolean isPublic;
 
-    @Column(name = "agenda")
-    private String agenda;
-
-    @Column(name = "deleted")
+    @Column(name = "deleted", insertable = false)
     private boolean deleted;
 
     @Column(name = "datetime_deleted")
@@ -59,6 +56,14 @@ public class Research {
             inverseJoinColumns = @JoinColumn(name = "agency_id")
     )
     private List<FundingAgency> fundingAgencies;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "agenda_research_rel",
+            joinColumns = @JoinColumn(name = "research_id"),
+            inverseJoinColumns = @JoinColumn(name = "agenda_id")
+    )
+    private List<ResearchAgenda> researchAgendaList;
 
     @Enumerated(EnumType.STRING)
     private ResearchStatus researchStatus;
