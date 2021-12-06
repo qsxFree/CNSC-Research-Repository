@@ -76,7 +76,7 @@ public class EntityBuilders {
      * @return Researchers
      */
     public Researchers buildResearcher(String name) {
-        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCase(name);
+        Optional<Researchers> researchers = researchersRepository.findByNameIgnoreCaseAndNotDeleted(name);
         return researchers.orElse(Researchers
                 .builder()
                 .name(name)
@@ -87,7 +87,8 @@ public class EntityBuilders {
     /**
      * Creates a Research File instance if the research title
      * didn't exist in the database.
-     * @param title - title of the research
+     *
+     * @param title    - title of the research
      * @param fileName - name of the file
      * @return ResearchFile
      */
@@ -104,13 +105,14 @@ public class EntityBuilders {
      * Creates a research instance from the database.
      * This is different from other entity builders because it
      * only returns the data that exist in the database
+     *
      * @param title - title of the the research.
      * @return Research
      * @throws Exception - throws an error if the data didn't exist.or the data is flagged deleted
-     * */
+     */
     public Research buildResearchFromDb(String title) throws Exception {
         Optional<Research> research = researchRepository.findResearchByTitle(title);
-        return research.orElseThrow(()->new Exception(String.format("cannot find %s ",title)));
+        return research.orElseThrow(() -> new Exception(String.format("cannot find %s ", title)));
     }
 
 }

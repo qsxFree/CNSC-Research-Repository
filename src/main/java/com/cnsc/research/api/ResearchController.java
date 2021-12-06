@@ -36,7 +36,7 @@ public class ResearchController {
     }
 
     @PostMapping("/pdf")
-    public String uploadPdf(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity uploadPdf(@RequestParam("file") MultipartFile file) {
         return service.processPdf(file);
     }
 

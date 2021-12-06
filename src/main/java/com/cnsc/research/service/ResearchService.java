@@ -109,14 +109,16 @@ public class ResearchService {
     }
 
 
-    public String processPdf(MultipartFile pdfFile) {
+    public ResponseEntity processPdf(MultipartFile pdfFile) {
         String fileName = "" + System.currentTimeMillis();
         try {
             storageUtility.inContainer(AzureStorageUtility.PDF_CONTAINER)
                     .upload(pdfFile.getBytes(), fileName + ".pdf");
-            return fileName;
+            return new ResponseEntity<String>(fileName, CREATED);
         } catch (IOException e) {
-            throw new RuntimeException("Error on writing pdf", e);
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on writing file : " + pdfFile.getName(), INTERNAL_SERVER_ERROR);
         }
     }
 
