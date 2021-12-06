@@ -36,8 +36,11 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
     public PresentationDto toTransaction(Presentation presentation) {
         return PresentationDto.builder()
                 .presentationId(presentation.getPresentationId())
+                .organizingAgency(presentation.getOrganizingAgency())
+                .eventName(presentation.getEventName())
                 .presentationDate(presentation.getPresentationDate())
                 .presentationType(presentation.getType().name().toLowerCase())
+                .isPrivate(presentation.isPrivate())
                 .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
                 .researchers(researcherMapper.toTransaction(presentation.getResearch().getResearchers()))
                 .build();
@@ -64,7 +67,10 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
         return Presentation.builder()
                 .presentationId(presentationDto.getPresentationId())
                 .type(type)
+                .organizingAgency(presentationDto.getOrganizingAgency())
+                .eventName(presentationDto.getEventName())
                 .presentationDate(presentationDto.getPresentationDate())
+                .isPrivate(presentationDto.isPrivate())
                 .research(entityBuilders.buildResearchFromDb(presentationDto.getPresentationTitle()))
                 .build();
     }
@@ -75,7 +81,10 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
                 cellData[keyArrangement.get(PresentationFields.TITLE_KEY)],
                 cellData[keyArrangement.get(PresentationFields.TYPE_KEY)],
                 null,
-                LocalDate.from(formatter.parse(cellData[keyArrangement.get(PresentationFields.DATE_KEY)].trim()))
+                LocalDate.from(formatter.parse(cellData[keyArrangement.get(PresentationFields.DATE_KEY)].trim())),
+                "",//TODO: change the organizing agency from import mapping
+                true,//TODO: change the privacy based on import
+                ""//TODO: change the event name based on event domain
         );
     }
 

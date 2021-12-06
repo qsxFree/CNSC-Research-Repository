@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DeliveryUnitRepository extends JpaRepository<DeliveryUnit,Integer> {
+public interface DeliveryUnitRepository extends JpaRepository<DeliveryUnit, Integer> {
     Optional<DeliveryUnit> findByUnitNameIgnoreCase(@Nullable String unitName);
 
     @Query("select distinct d from DeliveryUnit d order by d.unitName")

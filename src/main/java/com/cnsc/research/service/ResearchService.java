@@ -35,8 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 public class ResearchService {
@@ -46,7 +45,6 @@ public class ResearchService {
     private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilder;
     private final AzureStorageUtility storageUtility;
-
 
     private MultipartFile csvFile;
     private CsvImport csv;
@@ -111,14 +109,16 @@ public class ResearchService {
     }
 
 
-    public String processPdf(MultipartFile pdfFile) {
+    public ResponseEntity processPdf(MultipartFile pdfFile) {
         String fileName = "" + System.currentTimeMillis();
         try {
             storageUtility.inContainer(AzureStorageUtility.PDF_CONTAINER)
                     .upload(pdfFile.getBytes(), fileName + ".pdf");
-            return fileName;
+            return new ResponseEntity<String>(fileName, CREATED);
         } catch (IOException e) {
-            throw new RuntimeException("Error on writing pdf", e);
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on writing file : " + pdfFile.getName(), INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -139,32 +139,32 @@ public class ResearchService {
     }
 
     public ResponseEntity updateResearch(ResearchDto researchDto) {
-        ResponseEntity<String> response = null;
-
         try {
-            Research research = researchMapper.toDomain(researchDto);
-            researchRepository.save(research);
-            response = new ResponseEntity("Research Successfully Updated!", OK);
+            if (!researchRepository.researchTitleExistNotMatchingID(researchDto.getResearchFile().getTitle(), researchDto.getId())) {
+                Research research = researchMapper.toDomain(researchDto);
+                researchRepository.save(research);
+                return new ResponseEntity("Research has successfully updated", OK);
+            } else {
+                return new ResponseEntity("Research already exist", BAD_REQUEST);
+            }
         } catch (Exception e) {
-            response = new ResponseEntity("Update Error!", INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            return new ResponseEntity("Error on updating research " + researchDto.getId(), INTERNAL_SERVER_ERROR);
         }
 
-        return response;
     }
 
     public ResponseEntity deleteResearch(Integer researchId) {
-        ResponseEntity<String> response = null;
         try {
             Research research = researchRepository.findById(researchId).get();
             research.setDeleted(true);
             research.setDatetimeDeleted(LocalDateTime.now());
             researchRepository.save(research);
-            response = new ResponseEntity("Research Successfully Deleted!", OK);
+            return new ResponseEntity("Research has successfully deleted", OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new ResponseEntity("Delete Error!", INTERNAL_SERVER_ERROR);
+            return new ResponseEntity("Error on deleting research " + researchId, INTERNAL_SERVER_ERROR);
         }
-        return response;
     }
 
     public String deletePdf(String title) {
@@ -181,10 +181,17 @@ public class ResearchService {
         return format("%s file has been removed", fileName);
     }
 
-    public ResearchDto getResearch(Integer researchId) throws Exception {
-        Optional<Research> research = researchRepository.findById(researchId);
-        if (research.isPresent()) return researchMapper.toTransaction(research.get());
-        else throw new Exception("The research didn't exist");
+    public ResponseEntity getResearch(Integer researchId) {
+        try {
+            Optional<Research> research = researchRepository.findById(researchId);
+            if (research.isPresent())
+                return new ResponseEntity<ResearchDto>(researchMapper.toTransaction(research.get()), OK);
+            else return new ResponseEntity<String>(format("Can't find research"), NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving research " + researchId, INTERNAL_SERVER_ERROR);
+        }
     }
 
     public ResponseEntity deleteResearches(List<Integer> ids) {

@@ -20,6 +20,12 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     Page<Research> findByDeletedFalse(Pageable pageable);
 
+    boolean existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(String title);
+
+    @Query("select (count(r) > 0) from Research r where r.researchFile.title = ?1 and r.deleted = false and r.researchId <> ?2")
+    boolean researchTitleExistNotMatchingID(String title, Integer researchId);
+
+
     @Query("select r from Research r where upper(r.researchFile.title) = upper(?1) and r.deleted = false")
     Optional<Research> findResearchByTitle(String title);
 
@@ -54,4 +60,18 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     @Query("select max(r.budget) from Research r")
     Double getMaxBudget();
+
+    long countByDeliveryUnit_UnitId(Integer unitId);
+
+    long countByFundingAgencies_AgencyId(Integer agencyId);
+
+    long countByResearchers_ResearcherId(Integer researcherId);
+
+    List<Research> findByDeliveryUnit_UnitIdAndDeletedIsFalse(Integer unitId);
+
+    List<Research> findByFundingAgencies_AgencyIdAndDeletedIsFalse(Integer agencyId);
+
+    List<Research> findByResearchers_ResearcherIdAndDeletedIsFalse(Integer researcherId);
+
+
 }

@@ -41,7 +41,14 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         String researchTitle = research.getResearchFile().getTitle();
         String researchStatus = research.getResearchStatus().name();
         boolean isPublic = research.isPublic();
-        String agenda = research.getAgenda();
+
+        List<ResearchDto.ResearchAgenda> agendaList = research.getResearchAgendaList().stream()
+                .map(data -> ResearchDto
+                        .ResearchAgenda
+                        .builder()
+                        .agendaId(data.getAgendaId())
+                        .agendaName(data.getAgenda()).build()
+                ).collect(Collectors.toList());
 
         List<ResearchDto.FundingAgency> agencies = research.getFundingAgencies().stream()
                 .map(data -> ResearchDto
@@ -82,8 +89,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 researchers,
                 researchFile,
                 isPublic,
-                agenda
-
+                agendaList
         );
     }
 
@@ -96,11 +102,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         research.setStartDate(researchDto.getStartDate());
         research.setEndDate(researchDto.getEndDate());
         research.setRemarks(researchDto.getRemarks());
-        research.setDeleted(false);
-        System.out.println(researchDto.getIsPublic());
         research.setPublic(researchDto.getIsPublic());
-        research.setAgenda(researchDto.getAgenda());
-
 
         switch (researchDto.getResearchStatus().toLowerCase()) {
             case "new":
@@ -114,6 +116,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 break;
         }
 
+        //mapping funding agency
         research.setFundingAgencies(researchDto.getFundingAgency()
                 .stream()
                 .map(data ->
@@ -124,11 +127,13 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 .collect(Collectors.toList())
         );
 
+        //mapping delivery unit
         research.setDeliveryUnit(DeliveryUnit.builder()
                 .unitId(researchDto.getDeliveryUnit().getUnitId())
                 .unitName(researchDto.getDeliveryUnit().getUnitName())
                 .build());
 
+        //mapping researchers
         research.setResearchers(researchDto.getResearchers()
                 .stream()
                 .map(data ->
@@ -138,6 +143,8 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                                 .build())
                 .collect(Collectors.toList())
         );
+
+        //mapping research file
         research.setResearchFile(researchDto.getResearchFile() != null //if researchFile is not null
                 ? ResearchFile.builder()
                 .fileId(researchDto.getResearchFile().getFileId())
@@ -145,6 +152,17 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 .title(researchDto.getResearchFile().getTitle())
                 .build()
                 : ResearchFile.builder().title(researchDto.getResearchFile().getTitle()).build()
+        );
+
+        //mapping research agenda
+        research.setResearchAgendaList(researchDto.getResearchAgenda()
+                .stream()
+                .map(data ->
+                        ResearchAgenda.builder()
+                                .agendaId(data.getAgendaId())
+                                .agenda(data.getAgendaName())
+                                .build()
+                ).collect(Collectors.toList())
         );
 
         return research;

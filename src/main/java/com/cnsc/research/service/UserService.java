@@ -7,6 +7,7 @@ import com.cnsc.research.domain.model.User;
 import com.cnsc.research.domain.repository.UserRepository;
 import com.cnsc.research.domain.transaction.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper mapper;
-
 
 
     public String registerUser(User newUser) throws AccountAlreadyExistException {
@@ -43,7 +43,11 @@ public class UserService {
         return mapper.toTransaction(user.get());
     }
 
-    public List<UserDto> retrieveUsers(){
+    public List<UserDto> retrieveUsers() {
         return mapper.toTransaction(userRepository.findAll());
+    }
+
+    public ResponseEntity updateUser(UserDto user) {
+        return null;
     }
 }

@@ -25,7 +25,7 @@ public class ResearchDto implements Mappable {
     private List<Researchers> researchers;
     private ResearchFile researchFile;
     private Boolean isPublic;
-    private String agenda;
+    private List<ResearchAgenda> researchAgenda;
 
     @Data
     @AllArgsConstructor
@@ -62,6 +62,15 @@ public class ResearchDto implements Mappable {
     public static class FundingAgency {
         private Integer agencyId = null;
         private String agencyName;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class ResearchAgenda {
+        private Integer agendaId = null;
+        private String agendaName;
     }
 
 }

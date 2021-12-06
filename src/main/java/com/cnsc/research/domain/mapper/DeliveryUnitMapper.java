@@ -13,6 +13,6 @@ public class DeliveryUnitMapper extends GeneralMapper<DeliveryUnit, DeliveryUnit
 
     @Override
     public DeliveryUnit toDomain(DeliveryUnitDto transactionsData) throws Exception {
-        return null;
+        return new DeliveryUnit(transactionsData.getUnitId(), transactionsData.getUnitName(), null);
     }
 }

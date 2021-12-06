@@ -30,6 +30,9 @@ public class Event {
     @Column(name = "event_type")
     private String eventType;
 
+    @Column(name = "is_private")
+    private boolean isPrivate;
+
     @Column(name = "datetime_created")
     private LocalDateTime datetimeCreated;
 
