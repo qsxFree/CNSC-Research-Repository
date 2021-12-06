@@ -2,10 +2,10 @@ package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
-import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.service.PresentationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,33 +26,32 @@ public class PresentationController {
     }
 
     @GetMapping("/{id}")
-    public PresentationDto getPresentation(@PathVariable(name = "id") Long presentationId){
+    public PresentationDto getPresentation(@PathVariable(name = "id") Long presentationId) {
         return service.getPresentation(presentationId);
     }
 
     @PostMapping
-    public PresentationSaveResponse addPresentation(@RequestBody PresentationDto presentationDto){
-        try {
-            return service.addPresentation(presentationDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new PresentationSaveResponse("","An error has occured. Error - " + e.getMessage());
-        }
+    public ResponseEntity addPresentation(@RequestBody PresentationDto presentationDto) {
+        return service.addPresentation(presentationDto);
     }
 
     @PutMapping
-    public String editPresentation(@RequestBody PresentationDto presentationDto){
+    public ResponseEntity editPresentation(@RequestBody PresentationDto presentationDto) {
         return service.editPresentation(presentationDto);
     }
 
-    @DeleteMapping
-    public String deletePresentation(@RequestBody Long presentationId){
+    @DeleteMapping("/{id}")
+    public String deletePresentation(@PathVariable(name = "id") Long presentationId) {
         return service.deletePresentation(presentationId);
     }
 
     @PostMapping("/list")
-    public List<PresentationSaveResponse> saveBatch(@RequestBody List<PresentationDto> presentationDtos){
-        return service.savePresentations(presentationDtos);
+    public ResponseEntity saveBatch(@RequestBody List<PresentationDto> presentationDtos) {
+        try {
+            return service.savePresentations(presentationDtos);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on saving a batch of presentation", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/list")
@@ -61,7 +60,7 @@ public class PresentationController {
     }
 
     @DeleteMapping("/list")
-    public ResponseEntity deletePublications(@RequestBody List<Long> idList) {
+    public ResponseEntity deletePresentation(@RequestBody List<Long> idList) {
         return service.deletePresentations(idList);
     }
 

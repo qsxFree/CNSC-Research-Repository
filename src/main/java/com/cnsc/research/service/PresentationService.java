@@ -4,9 +4,9 @@ import com.cnsc.research.domain.mapper.PresentationMapper;
 import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
 import com.cnsc.research.domain.repository.PresentationRepository;
+import com.cnsc.research.domain.repository.ResearchRepository;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
-import com.cnsc.research.domain.transaction.PresentationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.PresentationFields;
 import com.cnsc.research.misc.importer.CsvImport;
@@ -25,20 +25,22 @@ import java.util.stream.Collectors;
 
 import static com.cnsc.research.domain.model.PresentationType.*;
 import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 public class PresentationService {
 
     private final PresentationRepository repository;
     private final PresentationMapper mapper;
+    private final ResearchRepository researchRepository;
     private final Logger logger;
     private final EntityBuilders builders;
 
     @Autowired
-    public PresentationService(PresentationRepository repository, PresentationMapper mapper, Logger logger, EntityBuilders builders) {
+    public PresentationService(PresentationRepository repository, PresentationMapper mapper, ResearchRepository researchRepository, Logger logger, EntityBuilders builders) {
         this.repository = repository;
         this.mapper = mapper;
+        this.researchRepository = researchRepository;
         this.logger = logger;
         this.builders = builders;
     }
@@ -48,17 +50,19 @@ public class PresentationService {
         return result.isPresent() ? mapper.toTransaction(result.get()) : null;
     }
 
-    public PresentationSaveResponse addPresentation(PresentationDto presentationDto) throws Exception {
-        //the toPresentation mappings will do a database operation.
-        //It will search for the existence of the research based on title
-        Presentation presentation = mapper.toDomain(presentationDto);
-        String researchTitle = presentation.getResearch().getResearchFile().getTitle();
-        PresentationType type = presentation.getType();
-        if (repository.existByTitleAndType(researchTitle, type))
-            return new PresentationSaveResponse(researchTitle, "Already Exist!");
-        else {
-            repository.save(presentation);
-            return new PresentationSaveResponse(researchTitle, "Saved!");
+    //the toDomain mappings will do a database operation.
+    //It will search for the existence of the research based on title
+    public ResponseEntity addPresentation(PresentationDto presentationDto) {
+        try {
+            if (researchRepository.existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(presentationDto.getPresentationTitle())) {
+                repository.save(mapper.toDomain(presentationDto));
+                return new ResponseEntity<String>("Presentation has successfully added", OK);
+            } else {
+                return new ResponseEntity<String>("Invalid research title.", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<String>(format("Error on adding presentation."), INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -86,13 +90,17 @@ public class PresentationService {
         return mapper.toTransaction(repository.findByDeletedIs(false));
     }
 
-    public String editPresentation(PresentationDto presentationDto) {
+    public ResponseEntity editPresentation(PresentationDto presentationDto) {
         try {
-            Presentation presentation = mapper.toDomain(presentationDto);
-            repository.save(presentation);
-            return "Publication saved";
+            if (researchRepository.existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(presentationDto.getPresentationTitle())) {
+                repository.save(mapper.toDomain(presentationDto));
+                return new ResponseEntity<String>("Presentation has successfully edited", OK);
+            } else {
+                return new ResponseEntity<String>("Invalid research title.", BAD_REQUEST);
+            }
         } catch (Exception e) {
-            return e.getMessage();
+            e.printStackTrace();
+            return new ResponseEntity<String>(format("Error on editing presentation."), INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -106,16 +114,21 @@ public class PresentationService {
         return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
     }
 
-    public List<PresentationSaveResponse> savePresentations(List<PresentationDto> presentationDtos) {
-        return presentationDtos.stream()
+    public ResponseEntity savePresentations(List<PresentationDto> presentationDtos) {
+        List<String> resultList = presentationDtos.stream()
                 .map(item -> {
+                    String title = item.getPresentationTitle();
                     try {
-                        return addPresentation(item);
+                        Presentation presentation = repository.save(mapper.toDomain(item));
+                        return format("Presentation Added ::: %s", title);
                     } catch (Exception e) {
-                        return new PresentationSaveResponse(item.getPresentationTitle(), "Didn't saved");
+                        logger.error(e.getMessage());
+                        return format("Can't add presentation ::: %s", title);
                     }
                 })
                 .collect(Collectors.toList());
+
+        return new ResponseEntity(resultList, OK);
     }
 
     public List<PresentationDto> getPresentationFromFile(MultipartFile incomingFile) throws Exception {

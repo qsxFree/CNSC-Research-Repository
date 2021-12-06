@@ -40,6 +40,7 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
                 .eventName(presentation.getEventName())
                 .presentationDate(presentation.getPresentationDate())
                 .presentationType(presentation.getType().name().toLowerCase())
+                .isPrivate(presentation.isPrivate())
                 .presentationTitle(presentation.getResearch().getResearchFile().getTitle())
                 .researchers(researcherMapper.toTransaction(presentation.getResearch().getResearchers()))
                 .build();
@@ -69,6 +70,7 @@ public class PresentationMapper extends GeneralMapper<Presentation, Presentation
                 .organizingAgency(presentationDto.getOrganizingAgency())
                 .eventName(presentationDto.getEventName())
                 .presentationDate(presentationDto.getPresentationDate())
+                .isPrivate(presentationDto.isPrivate())
                 .research(entityBuilders.buildResearchFromDb(presentationDto.getPresentationTitle()))
                 .build();
     }
