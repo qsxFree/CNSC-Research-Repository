@@ -1,13 +1,7 @@
 package com.cnsc.research.configuration.security;
 
 import com.cnsc.research.domain.model.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,19 +14,17 @@ import static java.lang.String.format;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenUtil {
+    private final String jwtIssuer = "com.cnsc.research";
+    private final Logger logger;
     @Value("${jwt-secret-key}")
     private String jwtSecret;
-    private final String jwtIssuer = "com.cnsc.research";
-
-    private final Logger logger;
-
 
     public String generateAccessToken(User user) {
         return Jwts.builder()
                 .setSubject(format("%s,%s", user.getId(), user.getUsername()))
                 .setIssuer(jwtIssuer)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 1 week
+                .setExpiration(new Date(System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000 * 4))) // 1 week
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
