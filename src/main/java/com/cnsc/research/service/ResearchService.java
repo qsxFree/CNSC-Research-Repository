@@ -261,8 +261,20 @@ public class ResearchService {
                 queryBuilder.getAgency(),
                 queryBuilder.getUnit(),
                 queryBuilder.getResearchers(),
+                queryBuilder.getAgenda(),
                 status
         );
         return researchMapper.toTransaction(result);
+    }
+
+    public ResponseEntity getPublicResearch() {
+        try {
+            return new ResponseEntity<List<ResearchDto>>(researchMapper
+                    .toTransaction(researchRepository
+                            .findByIsPublicIsTrueAndDeletedFalse()), OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Researches", INTERNAL_SERVER_ERROR);
+        }
     }
 }

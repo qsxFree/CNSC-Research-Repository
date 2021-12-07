@@ -4,6 +4,7 @@ import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
 import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
 import com.cnsc.research.domain.transaction.ResearchDto;
 import com.cnsc.research.domain.transaction.ResearchQueryBuilder;
+import com.cnsc.research.service.ReportService;
 import com.cnsc.research.service.ResearchService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,13 @@ public class ResearchController {
 
     private final ResearchService service;
     private final Logger logger;
+    private final ReportService reportService;
 
     @Autowired
-    public ResearchController(ResearchService service, Logger logger) {
+    public ResearchController(ResearchService service, Logger logger, ReportService reportService) {
         this.service = service;
         this.logger = logger;
+        this.reportService = reportService;
     }
 
     @PostMapping("/import")
@@ -102,5 +105,9 @@ public class ResearchController {
         return service.getMaxBudget();
     }
 
+    @PostMapping("/report")
+    public ResponseEntity generateReport(@RequestBody List<ResearchDto> researchDtos) {
+        return reportService.generateResearchReport(researchDtos);
+    }
 
 }
