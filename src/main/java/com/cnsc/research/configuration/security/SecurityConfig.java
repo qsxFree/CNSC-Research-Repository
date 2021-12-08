@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth){
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(getDaoAuthenticationProvider());
     }
 
@@ -52,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .and().authorizeRequests()
                 .antMatchers("/api/account/**", "/actuator", "/api/research/**").hasRole("SUPER_ADMIN")
-                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/", "/login", "/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and().addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
