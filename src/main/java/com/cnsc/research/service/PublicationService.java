@@ -5,9 +5,7 @@ import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.repository.PublicationRepository;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
-import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.domain.transaction.PublicationQueryBuilder;
-import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.PublicationFields;
 import com.cnsc.research.misc.importer.CsvImport;
@@ -24,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
 @Service
@@ -46,16 +45,11 @@ public class PublicationService {
 
     }
 
-    public PublicationSaveResponse addPublication(ExtendedPublicationDto publicationDto) {
+    public ResponseEntity addPublication(ExtendedPublicationDto publicationDto) {
         try {
-            if (repository.findByPublicationTitleIgnoreCaseAndDeleted(publicationDto.getPublicationTitle(), false).isPresent())
-                return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Already Exist!");
             Publication publication = publicationMapper.toDomain(publicationDto);
-
-            publicationDto.getResearchers().forEach(item -> logger.info("RESEARCHER ----" + item.getResearcherName()));
-
             //REMINDER -- this might cause a performance issue someday.
-            // run profiling and change the implementation.
+            // do some profiling and change the implementation.
             List<Researchers> researchers = publicationDto.getResearchers()
                     .stream()
                     .map(item -> entityBuilders.buildResearcher(item.getResearcherName()))
@@ -63,11 +57,11 @@ public class PublicationService {
 
             publication.setResearchers(researchers);
             repository.save(publication);
-            return new PublicationSaveResponse(publication.getPublicationTitle(), "Saved!");
+            return new ResponseEntity<String>("Publication has successfully added", OK);
         } catch (Exception e) {
             logger.error(format("Error on saving \"%s\"", publicationDto.getPublicationTitle()));
             logger.error(e.getMessage());
-            return new PublicationSaveResponse(publicationDto.getPublicationTitle(), "Error!");
+            return new ResponseEntity("Error on saving publication", INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -75,13 +69,13 @@ public class PublicationService {
         return publicationMapper.toExtendedTransaction(repository.getById(publicationId));
     }
 
-    public String editPublication(PublicationDto publicationDto) {
+    public ResponseEntity editPublication(ExtendedPublicationDto publicationDto) {
         try {
-            Publication publication = publicationMapper.toDomain(publicationDto);
-            repository.save(publication);
-            return "Publication saved";
+            repository.save(publicationMapper.toExtendedDomain(publicationDto));
+            return new ResponseEntity<String>("Publication has successfully edited", OK);
         } catch (Exception e) {
-            return e.getMessage();
+            e.printStackTrace();
+            return new ResponseEntity<String>("Error on editing presentation", INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -113,11 +107,22 @@ public class PublicationService {
         }
     }
 
-    public List<PublicationSaveResponse> savePublications(List<ExtendedPublicationDto> publicationDtos) {
-        return publicationDtos
+    public ResponseEntity savePublications(List<ExtendedPublicationDto> publicationDtos) {
+        List<String> resultList = publicationDtos
                 .stream()
-                .map(this::addPublication)
+                .map(item -> {
+                    String title = item.getPublicationTitle();
+                    try {
+                        repository.save(publicationMapper.toDomain(item));
+                        return format("Publication Added ::: %s", title);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                        return format("Can't add presentation ::: %s", title);
+                    }
+                })
                 .collect(Collectors.toList());
+
+        return new ResponseEntity(resultList, OK);
     }
 
     public ResponseEntity deletePublications(List<Long> idList) {

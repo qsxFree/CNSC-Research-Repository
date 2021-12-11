@@ -54,6 +54,7 @@ public class PresentationService {
     //It will search for the existence of the research based on title
     public ResponseEntity addPresentation(PresentationDto presentationDto) {
         try {
+            System.out.println(presentationDto.getIsPublic());
             if (researchRepository.existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(presentationDto.getPresentationTitle())) {
                 repository.save(mapper.toDomain(presentationDto));
                 return new ResponseEntity<String>("Presentation has successfully added", OK);
@@ -177,5 +178,22 @@ public class PresentationService {
                 types
         );
         return mapper.toTransaction(result);
+    }
+
+    public ResponseEntity triggerVisibility(Long id) {
+        try {
+            Optional<Presentation> presentationOptional = repository.findById(id);
+            if (presentationOptional.isPresent()) {
+                Presentation presentation = presentationOptional.get();
+                presentation.setPublic(!presentation.isPublic());
+                repository.save(presentation);
+                return new ResponseEntity<String>(presentation.isPublic() ? "The presentation is now public" : "The research is now private", OK);
+            } else {
+                return new ResponseEntity<String>("Presentation didn't exist", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on updating presentation", INTERNAL_SERVER_ERROR);
+        }
     }
 }

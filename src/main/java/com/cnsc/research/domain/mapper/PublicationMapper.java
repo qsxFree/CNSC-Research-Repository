@@ -4,6 +4,7 @@ import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.domain.transaction.ResearchersDto;
+import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.PublicationFields;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,10 +18,12 @@ import java.util.stream.Collectors;
 public class PublicationMapper extends ExtendedMapper<Publication, PublicationDto, ExtendedPublicationDto> implements DataImportMapper<Publication, ExtendedPublicationDto> {
 
     private final ResearcherMapper researcherMapper;
+    private final EntityBuilders entityBuilders;
 
     @Autowired
-    public PublicationMapper(ResearcherMapper researcherMapper) {
+    public PublicationMapper(ResearcherMapper researcherMapper, EntityBuilders entityBuilders) {
         this.researcherMapper = researcherMapper;
+        this.entityBuilders = entityBuilders;
     }
 
     public PublicationDto toTransaction(Publication publication) {
@@ -43,6 +46,19 @@ public class PublicationMapper extends ExtendedMapper<Publication, PublicationDt
                 .publicationId(publicationDto.getPublicationId())
                 .publicationTitle(publicationDto.getPublicationTitle())
                 .publicationLink(publicationDto.getPublicationLink())
+                .build();
+    }
+
+    public Publication toExtendedDomain(ExtendedPublicationDto publicationDto) {
+        return Publication.builder()
+                .publicationId(publicationDto.getPublicationId())
+                .publicationTitle(publicationDto.getPublicationTitle())
+                .publicationLink(publicationDto.getPublicationLink())
+                .researchers(publicationDto
+                        .getResearchers()
+                        .stream()
+                        .map(item -> entityBuilders.buildResearcher(item.getResearcherName()))
+                        .collect(Collectors.toList()))
                 .build();
     }
 

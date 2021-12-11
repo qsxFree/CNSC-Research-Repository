@@ -1,9 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
-import com.cnsc.research.domain.transaction.PublicationDto;
 import com.cnsc.research.domain.transaction.PublicationQueryBuilder;
-import com.cnsc.research.domain.transaction.PublicationSaveResponse;
 import com.cnsc.research.service.PublicationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,7 @@ public class PublicationController {
     }
 
     @PostMapping
-    public PublicationSaveResponse addPublication(@RequestBody ExtendedPublicationDto publication) {
+    public ResponseEntity addPublication(@RequestBody ExtendedPublicationDto publication) {
         return service.addPublication(publication);
     }
 
@@ -36,12 +34,12 @@ public class PublicationController {
     }
 
     @PutMapping
-    public String editPublication(@RequestBody PublicationDto publicationDto) {
+    public ResponseEntity editPublication(@RequestBody ExtendedPublicationDto publicationDto) {
         return service.editPublication(publicationDto);
     }
 
-    @DeleteMapping
-    public String deletePublication(@RequestBody Long id) {
+    @DeleteMapping("/{id}")
+    public String deletePublication(@PathVariable(name = "id") Long id) {
         return service.deletePublication(id);
     }
 
@@ -51,7 +49,7 @@ public class PublicationController {
     }
 
     @PostMapping("/list")
-    public List<PublicationSaveResponse> saveBatch(@RequestBody List<ExtendedPublicationDto> publicationDtos) {
+    public ResponseEntity saveBatch(@RequestBody List<ExtendedPublicationDto> publicationDtos) {
         return service.savePublications(publicationDtos);
     }
 

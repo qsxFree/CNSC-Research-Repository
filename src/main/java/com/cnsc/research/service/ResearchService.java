@@ -277,4 +277,21 @@ public class ResearchService {
             return new ResponseEntity("Error on retrieving Researches", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity triggerVisibility(Long id) {
+        try {
+            Optional<Research> researchOptional = researchRepository.findById(Math.toIntExact(id));
+            if (researchOptional.isPresent()) {
+                Research research = researchOptional.get();
+                research.setPublic(!research.isPublic());
+                researchRepository.save(research);
+                return new ResponseEntity<String>(research.isPublic() ? "The research is now public" : "The research is now private", OK);
+            } else {
+                return new ResponseEntity<String>("Research didn't exist", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
+        }
+    }
 }
