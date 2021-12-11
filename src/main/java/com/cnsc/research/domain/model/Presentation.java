@@ -28,8 +28,8 @@ public class Presentation {
     @Column(name = "presentation_date")
     private LocalDate presentationDate;
 
-    @Column(name = "is_private")
-    private boolean isPrivate;
+    @Column(name = "is_public")
+    private boolean isPublic;
 
     @Column(name = "event_name")
     private String eventName;

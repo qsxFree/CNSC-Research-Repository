@@ -83,4 +83,9 @@ public class PresentationController {
             return null;
         }
     }
+
+    @PutMapping("/visibility/{id}")
+    public ResponseEntity triggerVisibility(@PathVariable(name = "id") Long id) {
+        return service.triggerVisibility(id);
+    }
 }

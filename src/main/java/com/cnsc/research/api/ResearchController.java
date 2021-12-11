@@ -110,4 +110,9 @@ public class ResearchController {
         return reportService.generateResearchReport(researchDtos);
     }
 
+    @PutMapping("/visibility/{id}")
+    public ResponseEntity triggerVisibility(@PathVariable(name = "id") Long id) {
+        return service.triggerVisibility(id);
+    }
+
 }
