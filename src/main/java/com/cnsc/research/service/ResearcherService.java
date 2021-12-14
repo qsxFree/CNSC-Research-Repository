@@ -40,7 +40,7 @@ public class ResearcherService {
     }
 
     public List<ResearchersDto> getAllResearchers() {
-        return mapper.toTransaction(repository.findAll());
+        return mapper.toTransaction(repository.findByDeletedFalseOrderByNameAsc());
     }
 
     public ResponseEntity saveResearcher(ResearchersDto researchersDto) {
