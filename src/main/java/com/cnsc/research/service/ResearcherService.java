@@ -40,7 +40,7 @@ public class ResearcherService {
     }
 
     public List<ResearchersDto> getAllResearchers() {
-        return mapper.toTransaction(repository.findAll());
+        return mapper.toTransaction(repository.findByDeletedFalseOrderByNameAsc());
     }
 
     public ResponseEntity saveResearcher(ResearchersDto researchersDto) {
@@ -126,5 +126,13 @@ public class ResearcherService {
             return new ResponseEntity<String>("Can't retrieve researches", INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    public ResponseEntity getDistinctResearchers() {
+        try {
+            return new ResponseEntity(mapper.toTransaction(repository.findByDeletedFalseOrderByNameAsc()), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Researchers", INTERNAL_SERVER_ERROR);
+        }
     }
 }

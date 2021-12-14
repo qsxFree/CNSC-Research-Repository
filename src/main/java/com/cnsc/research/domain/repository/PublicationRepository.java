@@ -26,4 +26,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
             "and p.deleted = false")
     List<Publication> findAdvanced(@Param("names") Collection<String> names);
 
+    List<Publication> findByResearchers_ResearcherIdIsAndDeletedIsFalse(Integer researcherId);
+
+
 }

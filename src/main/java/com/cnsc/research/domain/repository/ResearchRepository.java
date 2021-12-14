@@ -79,5 +79,9 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     List<Research> findByResearchers_ResearcherIdAndDeletedIsFalse(Integer researcherId);
 
+    List<Research> findByResearchAgendaList_AgendaIgnoreCaseOrderByResearchFile_TitleAsc(String agenda);
+
+    List<Research> findByResearchStatusAndDeletedIsFalseOrderByResearchFile_TitleAsc(ResearchStatus researchStatus);
+
 
 }

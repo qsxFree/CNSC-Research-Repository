@@ -293,4 +293,28 @@ public class ResearchService {
             return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity getResearchByStatus(String status) {
+        try {
+            ResearchStatus researchStatus = null;
+            switch (status.toLowerCase()) {
+                case "new":
+                    researchStatus = ResearchStatus.NEW;
+                    break;
+                case "approved":
+                    researchStatus = ResearchStatus.APPROVED;
+                    break;
+                case "completed":
+                    researchStatus = ResearchStatus.COMPLETED;
+                    break;
+                default:
+                    return new ResponseEntity<String>("Can't find researches", NOT_FOUND);
+            }
+            List<Research> researchList = researchRepository.findByResearchStatusAndDeletedIsFalseOrderByResearchFile_TitleAsc(researchStatus);
+            return new ResponseEntity<List<ResearchDto>>(researchMapper.toTransaction(researchList), OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving researches", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

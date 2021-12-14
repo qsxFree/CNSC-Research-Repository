@@ -38,5 +38,9 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
             @Param("presentationDateEnd") LocalDate presentationDateEnd,
             @Param("types") Collection<PresentationType> types);
 
+    List<Presentation> findByTypeAndDeletedFalseOrderByResearch_ResearchFile_TitleAsc(PresentationType type);
+
+    List<Presentation> findByResearch_Researchers_ResearcherIdAndDeletedIsFalseOrderByResearch_ResearchFile_FileNameAsc(Integer researcherId);
+
 
 }
