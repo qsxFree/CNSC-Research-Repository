@@ -36,8 +36,12 @@ public class DeliveryUnitService {
         this.researchMapper = researchMapper;
     }
 
-    public List<DeliveryUnitDto> getDistinctDeliveryUnitName() {
-        return mapper.toTransaction(deliveryUnitRepository.findDistinctByOrderByUnitNameAsc());
+    public ResponseEntity getDistinctDeliveryUnitName() {
+        try {
+            return new ResponseEntity<List<DeliveryUnitDto>>(mapper.toTransaction(deliveryUnitRepository.findDistinctByOrderByUnitNameAsc()), OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving Delivery Unit", INTERNAL_SERVER_ERROR);
+        }
     }
 
     public ResponseEntity addDeliveryUnit(DeliveryUnitDto deliveryUnitDto) {

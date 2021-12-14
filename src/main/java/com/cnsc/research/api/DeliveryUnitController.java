@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/delivery-unit")
 public class DeliveryUnitController {
@@ -20,7 +18,7 @@ public class DeliveryUnitController {
     }
 
     @GetMapping("/list")
-    public List<DeliveryUnitDto> getDeliveryUnits() {
+    public ResponseEntity getDeliveryUnits() {
         return service.getDistinctDeliveryUnitName();
     }
 

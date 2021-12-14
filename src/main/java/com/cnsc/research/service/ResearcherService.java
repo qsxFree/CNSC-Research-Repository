@@ -127,4 +127,12 @@ public class ResearcherService {
         }
 
     }
+
+    public ResponseEntity getDistinctResearchers() {
+        try {
+            return new ResponseEntity(mapper.toTransaction(repository.findByDeletedFalseOrderByNameAsc()), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Researchers", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

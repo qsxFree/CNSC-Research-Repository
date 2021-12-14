@@ -124,4 +124,12 @@ public class FundingAgencyService {
         }
 
     }
+
+    public ResponseEntity getDistinctFundingAgency() {
+        try {
+            return new ResponseEntity(mapper.toTransaction(repository.findByOrderByAgencyNameAsc()), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Funding Agency", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -11,4 +11,6 @@ import java.util.List;
 public interface ResearchAgendaRepository extends JpaRepository<ResearchAgenda, Long> {
     @Query("select  distinct r.agenda from ResearchAgenda r order by r.agenda")
     List<String> findDistinct();
+
+
 }
