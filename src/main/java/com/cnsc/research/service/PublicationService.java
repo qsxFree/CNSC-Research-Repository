@@ -157,4 +157,12 @@ public class PublicationService {
             return new ResponseEntity("Error on retrieving publications", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity getPublicationByResearcher(Integer id) {
+        try {
+            return new ResponseEntity(publicationMapper.toExtendedTransaction(repository.findByResearchers_ResearcherIdIsAndDeletedIsFalse(id)), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving publication", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

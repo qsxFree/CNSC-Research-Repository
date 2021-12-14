@@ -53,6 +53,21 @@ public class PublicController {
         return publicationService.getPublicPublication();
     }
 
+    @GetMapping("/publication/search")
+    public ResponseEntity retrieveByPublicationTitle(@RequestParam(required = true) String title) {
+        try {
+            return new ResponseEntity(publicationService.getPublicationByTitle(title), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving publication", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/publication/researcher/{id}")
+    public ResponseEntity retrieveByPublicationTitle(@PathVariable(name = "id") Integer id) {
+        return publicationService.getPublicationByResearcher(id);
+
+    }
+
     @GetMapping("/presentation")
     public ResponseEntity retrieveAllPresentation() {
         return presentationService.getPublicPresentations();
