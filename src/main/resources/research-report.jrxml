@@ -21,51 +21,22 @@
     <queryString language="SQL">
         <![CDATA[Select * from Orders;]]>
     </queryString>
-    <field name="title" class="java.lang.String">
-    </field>
-    <field name="agenda" class="java.lang.String">
-    </field>
-    <field name="researcher" class="java.lang.String">
-    </field>
-    <field name="deliveryUnit" class="java.lang.String">
-    </field>
-    <field name="fundingAgency" class="java.lang.String">
-    </field>
-    <field name="budget" class="java.lang.Double">
-    </field>
-    <field name="status" class="java.lang.String">
-    </field>
-    <field name="remarks" class="java.lang.String">
-    </field>
+    <field name="title" class="java.lang.String"/>
+    <field name="agenda" class="java.lang.String"/>
+    <field name="researcher" class="java.lang.String"/>
+    <field name="deliveryUnit" class="java.lang.String"/>
+    <field name="fundingAgency" class="java.lang.String"/>
+    <field name="budget" class="java.lang.Double"/>
+    <field name="status" class="java.lang.String"/>
+    <field name="remarks" class="java.lang.String"/>
     <background>
         <band splitType="Stretch"/>
     </background>
     <title>
-        <band height="102" splitType="Stretch">
+        <band height="84" splitType="Stretch">
             <frame>
-                <reportElement mode="Opaque" x="0" y="0" width="802" height="66" backcolor="#000000"
-                               uuid="d8d9e644-3a32-491d-97cb-a277aff17133"/>
-                <staticText>
-                    <reportElement style="Title" x="0" y="0" width="370" height="66"
-                                   uuid="27d8f6ee-f0a9-44f6-a160-1763c3b00f30"/>
-                    <box topPadding="4" leftPadding="4" bottomPadding="4" rightPadding="4"/>
-                    <textElement verticalAlignment="Bottom">
-                        <font isBold="false"/>
-                    </textElement>
-                    <text><![CDATA[ARKIBO]]></text>
-                </staticText>
-                <staticText>
-                    <reportElement style="SubTitle" x="370" y="37" width="316" height="29"
-                                   uuid="cfa21334-0634-4605-9ea7-aca4981f67e4"/>
-                    <textElement textAlignment="Right">
-                        <font size="22" isBold="false"/>
-                    </textElement>
-                    <text><![CDATA[Research Report]]></text>
-                </staticText>
-            </frame>
-            <frame>
-                <reportElement mode="Opaque" x="0" y="70" width="802" height="32" forecolor="#000000"
-                               backcolor="#CC0000" uuid="b0c895f6-6dbd-477d-9858-9ad66af087e1"/>
+                <reportElement mode="Opaque" x="0" y="50" width="802" height="32" forecolor="#000000"
+                               backcolor="#820014" uuid="b0c895f6-6dbd-477d-9858-9ad66af087e1"/>
                 <textField pattern="EEEEE dd MMMMM yyyy">
                     <reportElement x="655" y="12" width="144" height="20" forecolor="#FFFFFF"
                                    uuid="a33fce3b-20c1-4696-873a-fe134d1e7d88"/>
@@ -74,7 +45,23 @@
                     </textElement>
                     <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
                 </textField>
+                <staticText>
+                    <reportElement x="10" y="10" width="188" height="14" forecolor="#FFFFFF"
+                                   uuid="ca3352ca-6f7d-43a3-8c0f-9e49e0017720"/>
+                    <textElement>
+                        <font fontName="Segoe UI"/>
+                    </textElement>
+                    <text><![CDATA[System Generated Report : Research]]></text>
+                </staticText>
             </frame>
+            <staticText>
+                <reportElement x="0" y="0" width="340" height="47" forecolor="#2E2E2E"
+                               uuid="fe0cefb2-e97b-4ac9-bb2d-71775eb89e7d"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Segoe UI" size="19" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ARKIBO : Research Repository]]></text>
+            </staticText>
         </band>
     </title>
     <pageHeader>
@@ -83,48 +70,48 @@
     <columnHeader>
         <band height="18" splitType="Stretch">
             <staticText>
-                <reportElement style="Column header" x="0" y="0" width="99" height="18" forecolor="#000000"
+                <reportElement style="Column header" x="0" y="0" width="110" height="18" forecolor="#000000"
                                uuid="4e94280a-8a4f-41df-9f4d-4fd42fc844d5">
                     <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                               value="310e02b5-e51d-4a4a-b5ae-b5c72ffb69b2"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Title]]></text>
             </staticText>
             <staticText>
-                <reportElement style="Column header" x="99" y="0" width="99" height="18" forecolor="#000000"
+                <reportElement style="Column header" x="110" y="0" width="88" height="18" forecolor="#000000"
                                uuid="11cd7880-ba71-4db0-9bac-ae277bf4f9a2">
                     <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                               value="1d18bf2b-8bf2-49aa-9dd0-f9c2dabd906f"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Agenda]]></text>
             </staticText>
             <staticText>
-                <reportElement style="Column header" x="198" y="0" width="99" height="18" forecolor="#000000"
+                <reportElement style="Column header" x="198" y="0" width="112" height="18" forecolor="#000000"
                                uuid="90a7cff7-796a-4e49-a896-d83eff1899eb">
                     <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                               value="3da493a4-ad57-48f8-9962-47e05e8c7ff2"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Researcher]]></text>
             </staticText>
             <staticText>
-                <reportElement style="Column header" x="297" y="0" width="99" height="18" forecolor="#000000"
+                <reportElement style="Column header" x="310" y="0" width="86" height="18" forecolor="#000000"
                                uuid="44db8bad-f784-4880-80db-8ee47b9d321d">
                     <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                               value="e986cb23-bbbd-4a63-8ca7-64ebec64d0d7"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
-                <text><![CDATA[Delivery Unit]]></text>
+                <text><![CDATA[Del .Unit]]></text>
             </staticText>
             <staticText>
                 <reportElement style="Column header" x="396" y="0" width="99" height="18" forecolor="#000000"
@@ -133,7 +120,7 @@
                               value="3ceb5a25-e20f-483f-822c-8ba610db72ec"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Funding Agency]]></text>
             </staticText>
@@ -144,7 +131,7 @@
                               value="6b4b492e-da36-4ccd-9389-8f9693ff3a81"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Budget]]></text>
             </staticText>
@@ -155,7 +142,7 @@
                               value="3952bead-a781-4b38-b99f-54ef7caad9f2"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Status]]></text>
             </staticText>
@@ -166,7 +153,7 @@
                               value="e6ad61d8-e7f8-4dae-ab07-4c815ed81c92"/>
                 </reportElement>
                 <textElement>
-                    <font isBold="true"/>
+                    <font fontName="Segoe UI" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Remarks]]></text>
             </staticText>
@@ -178,46 +165,46 @@
                 <reportElement style="Row" mode="Opaque" x="0" y="0" width="797" height="18"
                                uuid="34a2ae4b-4055-476b-8676-d499f6af510b"/>
                 <textField textAdjust="StretchHeight">
-                    <reportElement style="Detail" positionType="Float" x="0" y="0" width="99" height="18"
+                    <reportElement style="Detail" positionType="Float" x="0" y="0" width="110" height="18"
                                    uuid="0989c708-e4a9-4f99-8ebe-208f17de4f59">
                         <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                                   value="310e02b5-e51d-4a4a-b5ae-b5c72ffb69b2"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{title}]]></textFieldExpression>
                 </textField>
                 <textField textAdjust="StretchHeight">
-                    <reportElement style="Detail" positionType="Float" x="99" y="0" width="99" height="18"
+                    <reportElement style="Detail" positionType="Float" x="110" y="0" width="88" height="18"
                                    uuid="b182eea8-ef34-440a-9586-61004bc09c69">
                         <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                                   value="1d18bf2b-8bf2-49aa-9dd0-f9c2dabd906f"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{agenda}]]></textFieldExpression>
                 </textField>
                 <textField textAdjust="StretchHeight">
-                    <reportElement style="Detail" positionType="Float" x="198" y="0" width="99" height="18"
+                    <reportElement style="Detail" positionType="Float" x="198" y="0" width="112" height="18"
                                    uuid="0c518528-d14d-44e4-adca-efde4e41df8b">
                         <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                                   value="3da493a4-ad57-48f8-9962-47e05e8c7ff2"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{researcher}]]></textFieldExpression>
                 </textField>
                 <textField textAdjust="StretchHeight">
-                    <reportElement style="Detail" positionType="Float" x="297" y="0" width="99" height="18"
+                    <reportElement style="Detail" positionType="Float" x="310" y="0" width="86" height="18"
                                    uuid="e936cba5-9eb6-41cf-839c-22193c0ef465">
                         <property name="com.jaspersoft.studio.spreadsheet.connectionID"
                                   value="e986cb23-bbbd-4a63-8ca7-64ebec64d0d7"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{deliveryUnit}]]></textFieldExpression>
                 </textField>
@@ -228,7 +215,7 @@
                                   value="3ceb5a25-e20f-483f-822c-8ba610db72ec"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{fundingAgency}]]></textFieldExpression>
                 </textField>
@@ -239,7 +226,7 @@
                                   value="6b4b492e-da36-4ccd-9389-8f9693ff3a81"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{budget}]]></textFieldExpression>
                 </textField>
@@ -250,7 +237,7 @@
                                   value="3952bead-a781-4b38-b99f-54ef7caad9f2"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
                 </textField>
@@ -261,7 +248,7 @@
                                   value="e6ad61d8-e7f8-4dae-ab07-4c815ed81c92"/>
                     </reportElement>
                     <textElement>
-                        <font size="14"/>
+                        <font fontName="Segoe UI Light" size="12"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
                 </textField>

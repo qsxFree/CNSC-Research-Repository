@@ -270,8 +270,7 @@ public class ResearchService {
     public ResponseEntity getPublicResearch() {
         try {
             return new ResponseEntity<List<ResearchDto>>(researchMapper
-                    .toTransaction(researchRepository
-                            .findByIsPublicIsTrueAndDeletedFalse()), OK);
+                    .toTransaction(researchRepository.findByDeletedIsFalse()), OK);
 
         } catch (Exception e) {
             return new ResponseEntity("Error on retrieving Researches", INTERNAL_SERVER_ERROR);

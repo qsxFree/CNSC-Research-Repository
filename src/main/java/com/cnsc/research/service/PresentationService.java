@@ -45,9 +45,18 @@ public class PresentationService {
         this.builders = builders;
     }
 
-    public PresentationDto getPresentation(Long presentationId) {
-        Optional<Presentation> result = repository.findByPresentationIdAndDeletedIsFalse(presentationId);
-        return result.isPresent() ? mapper.toTransaction(result.get()) : null;
+    public ResponseEntity getPresentation(Long presentationId) {
+        try {
+            Optional<Presentation> result = repository.findByPresentationIdAndDeletedIsFalse(presentationId);
+            if (result.isPresent()) {
+                return new ResponseEntity<PresentationDto>(mapper.toTransaction(result.get()), OK);
+            } else {
+                return new ResponseEntity<String>("Cannot find presentation", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving presentation", INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     //the toDomain mappings will do a database operation.
@@ -194,6 +203,16 @@ public class PresentationService {
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<String>("Error on updating presentation", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity getPublicPresentations() {
+        try {
+            List<PresentationDto> presentationDtos = mapper.toTransaction(repository.findByDeletedIs(false));
+            return new ResponseEntity<List<PresentationDto>>(presentationDtos, OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving presentations", INTERNAL_SERVER_ERROR);
         }
     }
 }
