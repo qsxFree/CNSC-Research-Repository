@@ -147,4 +147,14 @@ public class PublicationService {
     public List<ExtendedPublicationDto> getPublicationByAdvancedFilter(PublicationQueryBuilder queryBuilder) {
         return publicationMapper.toExtendedTransaction(repository.findAdvanced(queryBuilder.getResearchers()));
     }
+
+    public ResponseEntity getPublicPublication() {
+        try {
+            List<Publication> publicationList = repository.findByDeletedIsFalse();
+            return new ResponseEntity<List<ExtendedPublicationDto>>(publicationMapper.toExtendedTransaction(publicationList), OK);
+        } catch (Exception e) {
+            logger.error(format("Line 98 : %s", e.getMessage()));
+            return new ResponseEntity("Error on retrieving publications", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

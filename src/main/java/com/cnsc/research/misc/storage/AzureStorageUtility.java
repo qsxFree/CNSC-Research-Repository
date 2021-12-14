@@ -14,6 +14,7 @@ import java.io.InputStream;
 @Component
 public class AzureStorageUtility {
     public static final String PDF_CONTAINER = "pdf";
+    public static final String DOCUMENT_CONTAINER = "documents";
     private final BlobServiceClient blobServiceClient;
     private BlobContainerClient blobContainerClient;
 

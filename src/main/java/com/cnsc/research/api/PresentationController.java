@@ -26,7 +26,7 @@ public class PresentationController {
     }
 
     @GetMapping("/{id}")
-    public PresentationDto getPresentation(@PathVariable(name = "id") Long presentationId) {
+    public ResponseEntity getPresentation(@PathVariable(name = "id") Long presentationId) {
         return service.getPresentation(presentationId);
     }
 

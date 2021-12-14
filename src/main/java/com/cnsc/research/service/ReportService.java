@@ -38,17 +38,17 @@ public class ReportService {
                         researchReport.setTitle(data.getResearchFile().getTitle());
                         researchReport.setAgenda(data.getResearchAgenda()
                                 .stream()
-                                .map(ResearchDto.ResearchAgenda::getAgendaName).collect(Collectors.joining(",")));
+                                .map(ResearchDto.ResearchAgenda::getAgendaName).collect(Collectors.joining(",\n")));
 
                         researchReport.setResearcher(data.getResearchers()
                                 .stream()
-                                .map(ResearchDto.Researchers::getName).collect(Collectors.joining(",")));
+                                .map(ResearchDto.Researchers::getName).collect(Collectors.joining(",\n")));
 
                         researchReport.setDeliveryUnit(data.getDeliveryUnit().getUnitName());
 
                         researchReport.setFundingAgency(data.getFundingAgency()
                                 .stream()
-                                .map(ResearchDto.FundingAgency::getAgencyName).collect(Collectors.joining(",")));
+                                .map(ResearchDto.FundingAgency::getAgencyName).collect(Collectors.joining(",\n")));
 
                         researchReport.setBudget(data.getBudget());
                         researchReport.setStatus(data.getResearchStatus());
