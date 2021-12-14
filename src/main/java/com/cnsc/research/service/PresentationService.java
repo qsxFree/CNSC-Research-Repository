@@ -215,4 +215,39 @@ public class PresentationService {
             return new ResponseEntity<String>("Error on retrieving presentations", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity getPresentationByType(String presentationType) {
+        try {
+            PresentationType type = null;
+            switch (presentationType.toLowerCase()) {
+                case "local":
+                    type = LOCAL;
+                    break;
+                case "regional":
+                    type = REGIONAL;
+                    break;
+                case "national":
+                    type = NATIONAL;
+                    break;
+                case "international":
+                    type = INTERNATIONAL;
+                    break;
+                default:
+                    return new ResponseEntity<String>("Can't retrieve presentation", NOT_FOUND);
+            }
+            List<Presentation> presentationList = repository.findByTypeAndDeletedFalseOrderByResearch_ResearchFile_TitleAsc(type);
+            return new ResponseEntity<List<PresentationDto>>(mapper.toTransaction(presentationList), OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving presentations", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity getPresentationByResearcher(Integer id) {
+        try {
+            List<Presentation> presentationList = repository.findByResearch_Researchers_ResearcherIdAndDeletedIsFalseOrderByResearch_ResearchFile_FileNameAsc(id);
+            return new ResponseEntity<List<PresentationDto>>(mapper.toTransaction(presentationList), OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving presentations", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

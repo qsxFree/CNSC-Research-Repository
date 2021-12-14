@@ -58,6 +58,15 @@ public class PublicController {
         return presentationService.getPublicPresentations();
     }
 
+    @GetMapping("/presentation/search")
+    public ResponseEntity retrieveByPresentationTitle(@RequestParam(required = true) String title) {
+        try {
+            return new ResponseEntity(presentationService.getPresentationByTitle(title), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving presentation", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/presentation/{id}")
     public ResponseEntity retrieveAllPresentation(@PathVariable(name = "id") Long presentationId) {
         return presentationService.getPresentation(presentationId);
@@ -109,4 +118,13 @@ public class PublicController {
         return researchService.getResearchByStatus(status);
     }
 
+    @GetMapping("/type/presentation/{type}")
+    public ResponseEntity retrievePresentationByType(@PathVariable(name = "type") String type) {
+        return presentationService.getPresentationByType(type);
+    }
+
+    @GetMapping("/researchers/presentation/{id}")
+    public ResponseEntity retrievePresentationByResearcher(@PathVariable(name = "id") Integer id) {
+        return presentationService.getPresentationByResearcher(id);
+    }
 }
