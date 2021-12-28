@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Component
-public class AzureStorageUtility {
+public class AzureStorageUtility extends StorageUtility {
     public static final String PDF_CONTAINER = "pdf";
     public static final String DOCUMENT_CONTAINER = "documents";
     private final BlobServiceClient blobServiceClient;
@@ -30,7 +30,6 @@ public class AzureStorageUtility {
                 .buildClient();
 
     }
-
 
     public void upload(byte[] streamData, String filename) throws IOException {
         BlockBlobClient blobClient = blobContainerClient.getBlobClient(filename).getBlockBlobClient();
@@ -55,6 +54,5 @@ public class AzureStorageUtility {
         blobContainerClient = blobServiceClient.getBlobContainerClient(container);
         return this;
     }
-
 
 }

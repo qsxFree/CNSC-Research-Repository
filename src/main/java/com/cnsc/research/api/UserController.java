@@ -37,6 +37,11 @@ public class UserController {
         return userService.retrieveUserByid(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable(name = "id") Integer id) {
+        return userService.deleteUser(id);
+    }
+
     @GetMapping("/list")
     public List<UserDto> getUsers() {
         return userService.retrieveUsers();
