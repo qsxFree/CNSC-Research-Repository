@@ -1,8 +1,6 @@
 package com.cnsc.research.api;
 
-import com.cnsc.research.domain.exception.AccountAlreadyExistException;
 import com.cnsc.research.domain.exception.AccountNotFound;
-import com.cnsc.research.domain.model.User;
 import com.cnsc.research.domain.transaction.UserDto;
 import com.cnsc.research.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,7 @@ public class UserController {
     }
 
     @PostMapping
-    public String addUser(@RequestBody User newUser) throws AccountAlreadyExistException {
+    public ResponseEntity addUser(@RequestBody UserDto newUser) {
         return userService.registerUser(newUser);
     }
 
@@ -42,8 +40,18 @@ public class UserController {
         return userService.deleteUser(id);
     }
 
+    @DeleteMapping("/list")
+    public ResponseEntity deleteUsers(@RequestBody List<Long> idList) {
+        return userService.deleteUsers(idList);
+    }
+
     @GetMapping("/list")
     public List<UserDto> getUsers() {
         return userService.retrieveUsers();
+    }
+
+    @GetMapping("/validate/{username}")
+    public ResponseEntity<String> validateUsername(@PathVariable String username) {
+        return userService.checkUsername(username);
     }
 }

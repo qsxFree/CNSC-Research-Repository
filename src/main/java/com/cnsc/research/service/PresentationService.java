@@ -117,9 +117,21 @@ public class PresentationService {
     public ResponseEntity deletePresentations(List<Long> idList) {
         AtomicInteger deleteCount = new AtomicInteger(0);
         idList.forEach((id) -> {
-            //FIXME This is not safe validation. This might change someday
-            if (this.deletePresentation(id).equals("Presentation has been deleted"))
-                deleteCount.getAndIncrement();
+            try {
+                Optional<Presentation> presentationOptional = repository.findById(id);
+                if (presentationOptional.isPresent()) {
+                    Presentation presentation = presentationOptional.get();
+                    presentation.setDeleted(true);
+                    presentation.setDateTimeDeleted(LocalDateTime.now());
+                    repository.save(presentation);
+                    deleteCount.getAndIncrement();
+                } else {
+                    logger.error("Cannot delete presentation " + id);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Error on deleting presentation " + id);
+            }
         });
         return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
     }

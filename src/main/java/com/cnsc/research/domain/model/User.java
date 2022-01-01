@@ -1,13 +1,11 @@
 package com.cnsc.research.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +20,7 @@ import static com.cnsc.research.domain.model.Role.SUPER_ADMIN;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User implements UserDetails {
     @Id
     @Column(name = "user_id", nullable = false)
@@ -34,6 +33,9 @@ public class User implements UserDetails {
     private String access;
     private String role;
     private boolean deleted;
+
+    @Column(name = "datetime_deleted")
+    private LocalDateTime datetimeDeleted;
 
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
     private List<Notification> notificationList;
@@ -62,6 +64,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !deleted;
     }
 }
