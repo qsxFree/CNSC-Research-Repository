@@ -2,6 +2,7 @@ package com.cnsc.research.domain.repository;
 
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.ResearchStatus;
+import com.cnsc.research.domain.model.analysis.StatusCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,9 @@ import java.util.Optional;
 public interface ResearchRepository extends JpaRepository<Research, Integer> {
     @Query("select r from Research r where r.isPublic = true and r.deleted = false")
     List<Research> findByIsPublicIsTrueAndDeletedFalse();
+
+    @Query("select count(r) from Research r where r.deleted = false")
+    long countByDeletedIsFalse();
 
 
     Page<Research> findByDeletedFalse(Pageable pageable);
@@ -83,5 +87,6 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     List<Research> findByResearchStatusAndDeletedIsFalseOrderByResearchFile_TitleAsc(ResearchStatus researchStatus);
 
-
+    @Query("select new com.cnsc.research.domain.model.analysis.StatusCount(r.researchStatus, count(r.researchStatus)) from Research  r group by r.researchStatus")
+    List<StatusCount> getStatusCount();
 }

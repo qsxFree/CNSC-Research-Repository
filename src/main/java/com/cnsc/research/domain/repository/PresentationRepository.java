@@ -2,6 +2,7 @@ package com.cnsc.research.domain.repository;
 
 import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
+import com.cnsc.research.domain.model.analysis.PresentationTypeCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,6 +42,11 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
     List<Presentation> findByTypeAndDeletedFalseOrderByResearch_ResearchFile_TitleAsc(PresentationType type);
 
     List<Presentation> findByResearch_Researchers_ResearcherIdAndDeletedIsFalseOrderByResearch_ResearchFile_FileNameAsc(Integer researcherId);
+
+    long countByDeletedFalse();
+
+    @Query("select new com.cnsc.research.domain.model.analysis.PresentationTypeCount(p.type,count(p.type)) from Presentation p where p.deleted = false group by p.type")
+    List<PresentationTypeCount> getTypeCounts();
 
 
 }

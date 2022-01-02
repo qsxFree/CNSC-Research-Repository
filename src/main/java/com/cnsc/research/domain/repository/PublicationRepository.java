@@ -28,5 +28,8 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
 
     List<Publication> findByResearchers_ResearcherIdIsAndDeletedIsFalse(Integer researcherId);
 
+    @Query("select count(p) from Publication p where p.deleted = false")
+    long countByDeletedIsFalse();
+
 
 }

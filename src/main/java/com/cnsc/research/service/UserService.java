@@ -125,4 +125,19 @@ public class UserService {
         });
         return new ResponseEntity(format("%d items has been deleted", deleteCount.get()), OK);
     }
+
+    public ResponseEntity retrieveUserByUsername(String username) {
+        try {
+            Optional<User> userOptional = userRepository.findUserByUsername(username);
+            if (userOptional.isPresent()) {
+                return new ResponseEntity<UserDto>(mapper.toTransaction(userOptional.get()), OK);
+            } else {
+                return new ResponseEntity<String>("Can't retrieve user", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<String>("Error on retrieving user", INTERNAL_SERVER_ERROR);
+        }
+    }
 }
