@@ -318,4 +318,35 @@ public class ResearchService {
             return new ResponseEntity<String>("Error on retrieving researches", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity changeStatus(Long id, String status) {
+        try {
+            ResearchStatus researchStatus = null;
+            switch (status.toLowerCase()) {
+                case "new":
+                    researchStatus = ResearchStatus.NEW;
+                    break;
+                case "approved":
+                    researchStatus = ResearchStatus.APPROVED;
+                    break;
+                case "completed":
+                    researchStatus = ResearchStatus.COMPLETED;
+                    break;
+                default:
+                    return new ResponseEntity<String>("Can't find researches", NOT_FOUND);
+            }
+            Optional<Research> researchOptional = researchRepository.findById(Math.toIntExact(id));
+            if (researchOptional.isPresent()) {
+                Research research = researchOptional.get();
+                research.setResearchStatus(researchStatus);
+                researchRepository.save(research);
+                return new ResponseEntity<String>("Research status has been updated", OK);
+            } else {
+                return new ResponseEntity<String>("Research didn't exist", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

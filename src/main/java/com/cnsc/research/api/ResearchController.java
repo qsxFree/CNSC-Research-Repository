@@ -115,4 +115,10 @@ public class ResearchController {
         return service.triggerVisibility(id);
     }
 
+    @PutMapping("/status/{id}/{status}")
+    public ResponseEntity changeStatus(@PathVariable(name = "id") Long id, @PathVariable(name = "status") String status) {
+        return service.changeStatus(id, status);
+    }
+
+
 }
