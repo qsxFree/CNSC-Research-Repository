@@ -1,13 +1,19 @@
 package com.cnsc.research.service;
 
+import com.cnsc.research.configuration.security.JwtTokenUtil;
 import com.cnsc.research.domain.exception.AccountNotFound;
 import com.cnsc.research.domain.mapper.UserMapper;
 import com.cnsc.research.domain.model.User;
 import com.cnsc.research.domain.repository.UserRepository;
+import com.cnsc.research.domain.transaction.AuthenticationResponse;
+import com.cnsc.research.domain.transaction.ChangePasswordDto;
 import com.cnsc.research.domain.transaction.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +32,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper mapper;
     private final Logger logger;
+    private final PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
+    private final AuthUserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     public ResponseEntity registerUser(UserDto newUser) {
         try {
@@ -133,6 +143,32 @@ public class UserService {
                 return new ResponseEntity<UserDto>(mapper.toTransaction(userOptional.get()), OK);
             } else {
                 return new ResponseEntity<String>("Can't retrieve user", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<String>("Error on retrieving user", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity changePassword(ChangePasswordDto changePasswordDto) {
+        try {
+            Optional<User> userOptional = userRepository.findById(changePasswordDto.getId());
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                try {
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), changePasswordDto.getOldPassword()));
+                } catch (Exception e) {
+                    return new ResponseEntity<String>("Invalid password", BAD_REQUEST);
+                }
+                user.setPassword(encoder.encode(changePasswordDto.getNewPassword()));
+                userRepository.save(user);
+                final UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
+                final String jws = jwtTokenUtil.generateAccessToken((User) userDetails);
+                logger.info(userDetails.getUsername() + " has successfully authenticated");
+                return ResponseEntity.ok(new AuthenticationResponse(jws));
+            } else {
+                return new ResponseEntity<String>("Can't find user ", BAD_REQUEST);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

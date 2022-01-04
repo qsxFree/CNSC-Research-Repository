@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.exception.AccountNotFound;
+import com.cnsc.research.domain.transaction.ChangePasswordDto;
 import com.cnsc.research.domain.transaction.UserDto;
 import com.cnsc.research.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +59,10 @@ public class UserController {
     @GetMapping("/validate/{username}")
     public ResponseEntity<String> validateUsername(@PathVariable String username) {
         return userService.checkUsername(username);
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+        return userService.changePassword(changePasswordDto);
     }
 }
