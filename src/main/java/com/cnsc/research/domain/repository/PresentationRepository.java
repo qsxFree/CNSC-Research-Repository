@@ -48,5 +48,8 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
     @Query("select new com.cnsc.research.domain.model.analysis.PresentationTypeCount(p.type,count(p.type)) from Presentation p where p.deleted = false group by p.type")
     List<PresentationTypeCount> getTypeCounts();
 
+    @Query("select p from Presentation p where year(p.presentationDate) = ?1 and month(p.presentationDate) = ?2")
+    List<Presentation> getPresentationsByEventDate(int year, int month);
+
 
 }

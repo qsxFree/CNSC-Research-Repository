@@ -89,4 +89,9 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     @Query("select new com.cnsc.research.domain.model.analysis.StatusCount(r.researchStatus, count(r.researchStatus)) from Research  r group by r.researchStatus")
     List<StatusCount> getStatusCount();
+
+    @Query("select r from Research r where year(r.endDate) = ?1 and month(r.endDate) = ?2")
+    List<Research> getResearchByEndDate(int year, int month);
+
+
 }
