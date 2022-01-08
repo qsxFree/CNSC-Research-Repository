@@ -26,6 +26,7 @@ public class ResearchDto implements Mappable {
     private ResearchFile researchFile;
     private Boolean isPublic;
     private List<ResearchAgenda> researchAgenda;
+    private Long view;
 
     @Data
     @AllArgsConstructor

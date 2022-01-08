@@ -35,6 +35,9 @@ public class Research {
     @Column(name = "is_public")
     private boolean isPublic;
 
+    @Column(name = "view")
+    private Long view;
+
     @Column(name = "deleted", insertable = false)
     private boolean deleted;
 
@@ -82,5 +85,4 @@ public class Research {
 
     @OneToMany(mappedBy = "research", fetch = FetchType.LAZY)
     private List<Presentation> presentations;
-
 }

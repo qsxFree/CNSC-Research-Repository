@@ -34,6 +34,16 @@ public class PublicController {
         return researchService.getPublicResearch();
     }
 
+    @PutMapping("/research/view/{id}")
+    public ResponseEntity incrementResearchViews(@PathVariable Long id) {
+        return researchService.incrementViews(id);
+    }
+
+    @GetMapping("/research/top")
+    public ResponseEntity getTopResearches() {
+        return researchService.getTopData();
+    }
+
     @GetMapping("/research/search")
     public ResponseEntity retrieveByResearchTitle(@RequestParam(required = true) String title) {
         try {

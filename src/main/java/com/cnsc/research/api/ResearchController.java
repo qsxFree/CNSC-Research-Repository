@@ -120,5 +120,9 @@ public class ResearchController {
         return service.changeStatus(id, status);
     }
 
+    @PutMapping("/view/{id}")
+    public ResponseEntity incrementViews(@PathVariable(name = "id") Long id) {
+        return service.incrementViews(id);
+    }
 
 }
