@@ -93,5 +93,9 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
     @Query("select r from Research r where year(r.endDate) = ?1 and month(r.endDate) = ?2")
     List<Research> getResearchByEndDate(int year, int month);
 
+    @Query(value = "select * from research where deleted = false order by datetime_added desc limit 10", nativeQuery = true)
+    List<Research> getRecentlyAdded();
 
+    @Query(value = "select * from research where deleted = false order by view desc limit 10", nativeQuery = true)
+    List<Research> getMostViewed();
 }

@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.service.AnalysisService;
+import com.cnsc.research.service.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,15 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalysisController {
 
     private final AnalysisService service;
+    private final ResearchService researchService;
 
     @Autowired
-    public AnalysisController(AnalysisService service) {
+    public AnalysisController(AnalysisService service, ResearchService researchService) {
         this.service = service;
+        this.researchService = researchService;
     }
 
     @GetMapping("/research/counts")
     public ResponseEntity getResearchRelatedCounts() {
         return service.getResearchRelatedCounts();
+    }
+
+    @GetMapping("/research/top")
+    public ResponseEntity getResearchTopData() {
+        return researchService.getTopData();
     }
 
     @GetMapping("/agenda")

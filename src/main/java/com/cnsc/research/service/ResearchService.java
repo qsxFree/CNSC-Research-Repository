@@ -6,10 +6,7 @@ import com.cnsc.research.domain.model.ResearchFile;
 import com.cnsc.research.domain.model.ResearchStatus;
 import com.cnsc.research.domain.repository.ResearchFileRepository;
 import com.cnsc.research.domain.repository.ResearchRepository;
-import com.cnsc.research.domain.transaction.ResearchBatchQueryResponse;
-import com.cnsc.research.domain.transaction.ResearchBatchSaveResponse;
-import com.cnsc.research.domain.transaction.ResearchDto;
-import com.cnsc.research.domain.transaction.ResearchQueryBuilder;
+import com.cnsc.research.domain.transaction.*;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import com.cnsc.research.misc.importer.CsvImport;
@@ -347,6 +344,39 @@ public class ResearchService {
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity incrementViews(Long id) {
+        try {
+            Optional<Research> researchOptional = researchRepository.findById(Math.toIntExact(id));
+            if (researchOptional.isPresent()) {
+                Research research = researchOptional.get();
+                research.setView(research.getView() + 1);
+                researchRepository.save(research);
+                return new ResponseEntity<String>("Research views has been updated", OK);
+            } else {
+                return new ResponseEntity<String>("Research didn't exist", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public ResponseEntity getTopData() {
+        TopData topData = new TopData();
+        try {
+            List<Research> recentlyAdded = researchRepository.getRecentlyAdded();
+            topData.setRecentlyAdded(researchMapper.toTransaction(recentlyAdded));
+
+            List<Research> mostViewed = researchRepository.getMostViewed();
+            topData.setMostViewed(researchMapper.toTransaction(mostViewed));
+            return new ResponseEntity(topData, OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving top data", INTERNAL_SERVER_ERROR);
         }
     }
 }

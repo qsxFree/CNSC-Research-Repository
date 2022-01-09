@@ -41,6 +41,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         String researchTitle = research.getResearchFile().getTitle();
         String researchStatus = research.getResearchStatus().name();
         boolean isPublic = research.isPublic();
+        long view = research.getView();
 
         List<ResearchDto.ResearchAgenda> agendaList = research.getResearchAgendaList().stream()
                 .map(data -> ResearchDto
@@ -89,7 +90,8 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 researchers,
                 researchFile,
                 isPublic,
-                agendaList
+                agendaList,
+                view
         );
     }
 
@@ -103,6 +105,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         research.setEndDate(researchDto.getEndDate());
         research.setRemarks(researchDto.getRemarks());
         research.setPublic(researchDto.getIsPublic());
+        research.setView(researchDto.getView());
 
         switch (researchDto.getResearchStatus().toLowerCase()) {
             case "new":
@@ -202,6 +205,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 researcherList,
                 ResearchDto.ResearchFile.builder().title(csvRow[keyArrangement.get(ResearchFields.TITLE_KEY)]).build(),
                 false,//TODO fix the mapping for import
+                null,
                 null
         );
 
