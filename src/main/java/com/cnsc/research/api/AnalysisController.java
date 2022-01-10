@@ -26,6 +26,11 @@ public class AnalysisController {
         return service.getResearchRelatedCounts();
     }
 
+    @GetMapping("/research/budget")
+    public ResponseEntity getBudgetByYear() {
+        return service.getBudgetByYear();
+    }
+
     @GetMapping("/research/top")
     public ResponseEntity getResearchTopData() {
         return researchService.getTopData();

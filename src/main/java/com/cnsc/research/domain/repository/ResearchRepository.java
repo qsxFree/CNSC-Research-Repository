@@ -2,6 +2,7 @@ package com.cnsc.research.domain.repository;
 
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.ResearchStatus;
+import com.cnsc.research.domain.model.analysis.BudgetDate;
 import com.cnsc.research.domain.model.analysis.StatusCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +78,8 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     long countByResearchers_ResearcherId(Integer researcherId);
 
+    List<Research> findByDeletedFalseOrderByStartDateAsc();
+
     List<Research> findByDeliveryUnit_UnitIdAndDeletedIsFalse(Integer unitId);
 
     List<Research> findByFundingAgencies_AgencyIdAndDeletedIsFalse(Integer agencyId);
@@ -89,6 +92,9 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
 
     @Query("select new com.cnsc.research.domain.model.analysis.StatusCount(r.researchStatus, count(r.researchStatus)) from Research  r group by r.researchStatus")
     List<StatusCount> getStatusCount();
+
+    @Query("select new com.cnsc.research.domain.model.analysis.BudgetDate(year(r.startDate),sum(r.budget)) from Research r group by year(r.startDate) order by year(r.startDate) asc")
+    List<BudgetDate> getBudgetByYear();
 
     @Query("select r from Research r where year(r.endDate) = ?1 and month(r.endDate) = ?2")
     List<Research> getResearchByEndDate(int year, int month);

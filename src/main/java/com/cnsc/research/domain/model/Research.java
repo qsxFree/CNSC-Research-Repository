@@ -35,7 +35,7 @@ public class Research {
     @Column(name = "is_public")
     private boolean isPublic;
 
-    @Column(name = "view")
+    @Column(name = "view", insertable = false)
     private Long view;
 
     @Column(name = "deleted", insertable = false)
