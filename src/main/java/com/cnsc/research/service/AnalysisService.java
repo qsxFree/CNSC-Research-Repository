@@ -95,6 +95,16 @@ public class AnalysisService {
         }
     }
 
+    public ResponseEntity getBudgetByYear() {
+        try {
+            return new ResponseEntity(researchRepository.getBudgetByYear(), OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving budget data", INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity getResearchStatusCount() {
         try {
             List<StatusCount> result = researchRepository.getStatusCount();
@@ -114,6 +124,7 @@ public class AnalysisService {
             counts.put("fundingAgency", getFundingAgencyCount().getBody());
             counts.put("researcher", getResearcherCount().getBody());
             counts.put("status", getResearchStatusCount().getBody());
+            counts.put("budget", getBudgetByYear().getBody());
             return new ResponseEntity<Map<String, Object>>(counts, OK);
         } catch (Exception e) {
             e.printStackTrace();
