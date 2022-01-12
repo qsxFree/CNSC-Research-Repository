@@ -27,8 +27,8 @@ public class UserMapper extends GeneralMapper<User, UserDto> {
                 .build();
     }
 
-    public UserMapper withPassword() {
-        this.withPassword = true;
+    public UserMapper withPassword(boolean passwordFlag) {
+        this.withPassword = passwordFlag;
         return this;
     }
 

@@ -140,6 +140,8 @@ public class ResearchService {
         try {
             if (!researchRepository.researchTitleExistNotMatchingID(researchDto.getResearchFile().getTitle(), researchDto.getId())) {
                 Research research = researchMapper.toDomain(researchDto);
+                Research oldData = researchRepository.findById(research.getResearchId()).get();
+                research.setView(oldData.getView());
                 researchRepository.save(research);
                 return new ResponseEntity("Research has successfully updated", OK);
             } else {

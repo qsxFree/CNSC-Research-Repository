@@ -1,7 +1,11 @@
 package com.cnsc.research.domain.mapper;
 
-import com.cnsc.research.domain.model.*;
+import com.cnsc.research.domain.model.Research;
+import com.cnsc.research.domain.model.ResearchAgenda;
+import com.cnsc.research.domain.model.ResearchFile;
+import com.cnsc.research.domain.model.ResearchStatus;
 import com.cnsc.research.domain.transaction.ResearchDto;
+import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,15 +24,18 @@ import java.util.stream.Collectors;
 public class ResearchMapper extends GeneralMapper<Research, ResearchDto> implements DataImportMapper<Research, ResearchDto> {
 
     private final DateTimeFormatter formatter;
+    private final EntityBuilders entityBuilders;
 
     /**
      * Instantiates a new Research mapper.
      *
-     * @param formatter the formatter
+     * @param formatter      the formatter
+     * @param entityBuilders
      */
     @Autowired
-    public ResearchMapper(DateTimeFormatter formatter) {
+    public ResearchMapper(DateTimeFormatter formatter, EntityBuilders entityBuilders) {
         this.formatter = formatter;
+        this.entityBuilders = entityBuilders;
     }
 
     @Override
@@ -123,27 +130,18 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
         research.setFundingAgencies(researchDto.getFundingAgency()
                 .stream()
                 .map(data ->
-                        FundingAgency.builder()
-                                .agencyId(data.getAgencyId())
-                                .agencyName(data.getAgencyName())
-                                .build())
+                        entityBuilders.buildFundingAgency(data.getAgencyName()))
                 .collect(Collectors.toList())
         );
 
         //mapping delivery unit
-        research.setDeliveryUnit(DeliveryUnit.builder()
-                .unitId(researchDto.getDeliveryUnit().getUnitId())
-                .unitName(researchDto.getDeliveryUnit().getUnitName())
-                .build());
+        research.setDeliveryUnit(entityBuilders.buildDeliveryUnit(researchDto.getDeliveryUnit().getUnitName()));
 
         //mapping researchers
         research.setResearchers(researchDto.getResearchers()
                 .stream()
                 .map(data ->
-                        Researchers.builder()
-                                .researcherId(data.getResearcherId())
-                                .name(data.getName())
-                                .build())
+                        entityBuilders.buildResearcher(data.getName()))
                 .collect(Collectors.toList())
         );
 

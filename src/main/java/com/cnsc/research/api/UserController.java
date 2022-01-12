@@ -56,6 +56,11 @@ public class UserController {
         return userService.retrieveUsers();
     }
 
+    @GetMapping("/search/{keyword}")
+    public ResponseEntity getUsers(@PathVariable(name = "keyword") String keyword) {
+        return userService.searchUser(keyword);
+    }
+
     @GetMapping("/validate/{username}")
     public ResponseEntity<String> validateUsername(@PathVariable String username) {
         return userService.checkUsername(username);

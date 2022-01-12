@@ -40,7 +40,7 @@ public class UserService {
     public ResponseEntity registerUser(UserDto newUser) {
         try {
             if (!accountExist(newUser.getUsername())) {
-                userRepository.save(mapper.withPassword().toDomain(newUser));
+                userRepository.save(mapper.withPassword(true).toDomain(newUser));
                 return new ResponseEntity("Account added", CREATED);
             } else {
                 return new ResponseEntity<String>(String.format("User %s already exist ", newUser.getUsername()), BAD_REQUEST);
@@ -81,7 +81,7 @@ public class UserService {
 
     public ResponseEntity updateUser(UserDto userDto) {
         try {
-            User userUpdate = mapper.toDomain(userDto);
+            User userUpdate = mapper.withPassword(false).toDomain(userDto);
             userUpdate.setPassword(userRepository
                     .findById(userUpdate.getId())
                     .orElseThrow(() -> new Exception("Can't find user with id " + userUpdate.getId()))
@@ -170,6 +170,17 @@ public class UserService {
             } else {
                 return new ResponseEntity<String>("Can't find user ", BAD_REQUEST);
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<String>("Error on retrieving user", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity searchUser(String keyword) {
+        try {
+            List<User> userList = userRepository.searchUser(keyword);
+            return ResponseEntity.ok(mapper.toTransaction(userList));
         } catch (Exception e) {
             logger.error(e.getMessage());
             e.printStackTrace();
