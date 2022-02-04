@@ -1,10 +1,15 @@
 package com.cnsc.research.service;
 
+import com.cnsc.research.configuration.util.CurrentUser;
 import com.cnsc.research.domain.mapper.PresentationMapper;
+import com.cnsc.research.domain.model.LogAction;
 import com.cnsc.research.domain.model.Presentation;
+import com.cnsc.research.domain.model.PresentationLog;
 import com.cnsc.research.domain.model.PresentationType;
+import com.cnsc.research.domain.repository.PresentationLogRepository;
 import com.cnsc.research.domain.repository.PresentationRepository;
 import com.cnsc.research.domain.repository.ResearchRepository;
+import com.cnsc.research.domain.repository.UserRepository;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
 import com.cnsc.research.misc.EntityBuilders;
@@ -23,6 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.cnsc.research.domain.model.LogAction.*;
 import static com.cnsc.research.domain.model.PresentationType.*;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.*;
@@ -31,18 +37,24 @@ import static org.springframework.http.HttpStatus.*;
 public class PresentationService {
 
     private final PresentationRepository repository;
+    private final PresentationLogRepository logRepository;
     private final PresentationMapper mapper;
     private final ResearchRepository researchRepository;
+    private final UserRepository userRepository;
     private final Logger logger;
     private final EntityBuilders builders;
 
     @Autowired
-    public PresentationService(PresentationRepository repository, PresentationMapper mapper, ResearchRepository researchRepository, Logger logger, EntityBuilders builders) {
+
+    public PresentationService(PresentationRepository repository, PresentationLogRepository logRepository, PresentationMapper mapper, ResearchRepository researchRepository, UserRepository userRepository, Logger logger, EntityBuilders builders) {
         this.repository = repository;
+        this.logRepository = logRepository;
         this.mapper = mapper;
         this.researchRepository = researchRepository;
+        this.userRepository = userRepository;
         this.logger = logger;
         this.builders = builders;
+
     }
 
     public ResponseEntity getPresentation(Long presentationId) {
@@ -63,9 +75,9 @@ public class PresentationService {
     //It will search for the existence of the research based on title
     public ResponseEntity addPresentation(PresentationDto presentationDto) {
         try {
-            System.out.println(presentationDto.getIsPublic());
             if (researchRepository.existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(presentationDto.getPresentationTitle())) {
-                repository.save(mapper.toDomain(presentationDto));
+                Presentation savedData = repository.save(mapper.toDomain(presentationDto));
+                saveLog(savedData.getPresentationId(), CurrentUser.get().getId(), ADD);
                 return new ResponseEntity<String>("Presentation has successfully added", OK);
             } else {
                 return new ResponseEntity<String>("Invalid research title.", BAD_REQUEST);
@@ -86,6 +98,7 @@ public class PresentationService {
                     presentation.setDeleted(true);
                     presentation.setDateTimeDeleted(LocalDateTime.now());
                     repository.save(presentation);
+                    saveLog(presentationId, CurrentUser.get().getId(), DELETE);
                 }
                 deleteMessage = "Presentation has been deleted";
             } catch (Exception e) {
@@ -104,6 +117,7 @@ public class PresentationService {
         try {
             if (researchRepository.existsByResearchFile_TitleIgnoreCaseAndDeletedIsFalse(presentationDto.getPresentationTitle())) {
                 repository.save(mapper.toDomain(presentationDto));
+                saveLog(presentationDto.getPresentationId(), CurrentUser.get().getId(), EDIT);
                 return new ResponseEntity<String>("Presentation has successfully edited", OK);
             } else {
                 return new ResponseEntity<String>("Invalid research title.", BAD_REQUEST);
@@ -124,6 +138,7 @@ public class PresentationService {
                     presentation.setDeleted(true);
                     presentation.setDateTimeDeleted(LocalDateTime.now());
                     repository.save(presentation);
+                    saveLog(id, CurrentUser.get().getId(), DELETE);
                     deleteCount.getAndIncrement();
                 } else {
                     logger.error("Cannot delete presentation " + id);
@@ -142,6 +157,7 @@ public class PresentationService {
                     String title = item.getPresentationTitle();
                     try {
                         Presentation presentation = repository.save(mapper.toDomain(item));
+                        saveLog(presentation.getPresentationId(), CurrentUser.get().getId(), ADD);
                         return format("Presentation Added ::: %s", title);
                     } catch (Exception e) {
                         logger.error(e.getMessage());
@@ -208,6 +224,7 @@ public class PresentationService {
                 Presentation presentation = presentationOptional.get();
                 presentation.setPublic(!presentation.isPublic());
                 repository.save(presentation);
+                saveLog(id, CurrentUser.get().getId(), EDIT);
                 return new ResponseEntity<String>(presentation.isPublic() ? "The presentation is now public" : "The research is now private", OK);
             } else {
                 return new ResponseEntity<String>("Presentation didn't exist", BAD_REQUEST);
@@ -261,5 +278,15 @@ public class PresentationService {
         } catch (Exception e) {
             return new ResponseEntity<String>("Error on retrieving presentations", INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    private void saveLog(long presentationId, long userId, LogAction action) {
+        PresentationLog logData = PresentationLog.builder()
+                .presentationId(presentationId)
+                .userId(userId)
+                .action(action.getAction())
+                .build();
+        logRepository.save(logData);
     }
 }
