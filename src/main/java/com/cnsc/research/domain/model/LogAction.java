@@ -3,7 +3,7 @@ package com.cnsc.research.domain.model;
 public enum LogAction {
     ADD("ADD"),
     EDIT("EDIT"),
-    DELETE("DELETE");
+    ARCHIVE("ARCHIVE");
 
     private String action;
 

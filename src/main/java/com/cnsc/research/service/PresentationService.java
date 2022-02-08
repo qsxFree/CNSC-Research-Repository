@@ -10,8 +10,10 @@ import com.cnsc.research.domain.repository.PresentationLogRepository;
 import com.cnsc.research.domain.repository.PresentationRepository;
 import com.cnsc.research.domain.repository.ResearchRepository;
 import com.cnsc.research.domain.repository.UserRepository;
+import com.cnsc.research.domain.transaction.LogDto;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
+import com.cnsc.research.domain.transaction.TrackingInformation;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.PresentationFields;
 import com.cnsc.research.misc.importer.CsvImport;
@@ -45,7 +47,6 @@ public class PresentationService {
     private final EntityBuilders builders;
 
     @Autowired
-
     public PresentationService(PresentationRepository repository, PresentationLogRepository logRepository, PresentationMapper mapper, ResearchRepository researchRepository, UserRepository userRepository, Logger logger, EntityBuilders builders) {
         this.repository = repository;
         this.logRepository = logRepository;
@@ -98,7 +99,7 @@ public class PresentationService {
                     presentation.setDeleted(true);
                     presentation.setDateTimeDeleted(LocalDateTime.now());
                     repository.save(presentation);
-                    saveLog(presentationId, CurrentUser.get().getId(), DELETE);
+                    saveLog(presentationId, CurrentUser.get().getId(), ARCHIVE);
                 }
                 deleteMessage = "Presentation has been deleted";
             } catch (Exception e) {
@@ -138,7 +139,7 @@ public class PresentationService {
                     presentation.setDeleted(true);
                     presentation.setDateTimeDeleted(LocalDateTime.now());
                     repository.save(presentation);
-                    saveLog(id, CurrentUser.get().getId(), DELETE);
+                    saveLog(id, CurrentUser.get().getId(), ARCHIVE);
                     deleteCount.getAndIncrement();
                 } else {
                     logger.error("Cannot delete presentation " + id);
@@ -280,7 +281,6 @@ public class PresentationService {
         }
     }
 
-
     private void saveLog(long presentationId, long userId, LogAction action) {
         PresentationLog logData = PresentationLog.builder()
                 .presentationId(presentationId)
@@ -288,5 +288,36 @@ public class PresentationService {
                 .action(action.getAction())
                 .build();
         logRepository.save(logData);
+    }
+
+    public ResponseEntity getLogs() {
+        try {
+            List<LogDto> logs = logRepository.finAllJoined();
+            return new ResponseEntity<List<LogDto>>(logs, OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving presentation logs", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity getLog(Long dataId) {
+        try {
+            TrackingInformation metadata = new TrackingInformation();
+
+            Optional<LogDto> optionalLogDto = logRepository.addMetadata(dataId);
+            if (optionalLogDto.isPresent()) {
+                metadata.setAddedBy(optionalLogDto.get().getName());
+                metadata.setDateTimeAdded(optionalLogDto.get().getDateTime());
+            }
+
+            List<LogDto> logDtoList = logRepository.editMetadata(dataId);
+            if (!logDtoList.isEmpty()) {
+                metadata.setEditedBy(logDtoList.get(0).getName());
+                metadata.setDateTimeEdited(logDtoList.get(0).getDateTime());
+            }
+
+            return new ResponseEntity<TrackingInformation>(metadata, OK);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error on retrieving metadata", INTERNAL_SERVER_ERROR);
+        }
     }
 }
