@@ -1,5 +1,6 @@
 package com.cnsc.research.service;
 
+import com.cnsc.research.configuration.util.CurrentUser;
 import com.cnsc.research.domain.mapper.ResearchMapper;
 import com.cnsc.research.domain.model.Research;
 import com.cnsc.research.domain.model.ResearchFile;
@@ -31,6 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.cnsc.research.domain.model.EntityType.RESEARCH;
+import static com.cnsc.research.domain.model.LogAction.*;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.*;
 
@@ -42,10 +45,9 @@ public class ResearchService {
     private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilder;
     private final DigitalOceanStorageUtility storageUtility;
-
+    private final LogService logService;
     private MultipartFile csvFile;
     private CsvImport csv;
-
 
     @Autowired
     public ResearchService(Logger logger,
@@ -53,14 +55,15 @@ public class ResearchService {
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
                            EntityBuilders entityBuilder,
-                           DigitalOceanStorageUtility storageUtility
-    ) {
+                           DigitalOceanStorageUtility storageUtility,
+                           LogService logService) {
         this.entityBuilder = entityBuilder;
         this.logger = logger;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
         this.researchMapper = researchMapper;
         this.storageUtility = storageUtility;
+        this.logService = logService;
     }
 
     public List<ResearchBatchSaveResponse> saveResearches(List<ResearchDto> researchDtos) {
@@ -77,8 +80,8 @@ public class ResearchService {
 
         Research research = researchMapper.toDomain(researchDto);
         logger.info(research.toString());
-        researchRepository.save(validateRelationships(research));
-
+        Research savedData = researchRepository.save(validateRelationships(research));
+        logService.saveLog(savedData.getResearchId(), CurrentUser.get().getId(), ADD, RESEARCH);
         return new ResearchBatchSaveResponse(research.getResearchFile().getTitle(), "Saved!");
     }
 
@@ -143,6 +146,7 @@ public class ResearchService {
                 Research oldData = researchRepository.findById(research.getResearchId()).get();
                 research.setView(oldData.getView());
                 researchRepository.save(research);
+                logService.saveLog(researchDto.getId(), CurrentUser.get().getId(), EDIT, RESEARCH);
                 return new ResponseEntity("Research has successfully updated", OK);
             } else {
                 return new ResponseEntity("Research already exist", BAD_REQUEST);
@@ -160,6 +164,7 @@ public class ResearchService {
             research.setDeleted(true);
             research.setDatetimeDeleted(LocalDateTime.now());
             researchRepository.save(research);
+            logService.saveLog(researchId, CurrentUser.get().getId(), ARCHIVE, RESEARCH);
             return new ResponseEntity("Research has successfully deleted", OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -203,8 +208,10 @@ public class ResearchService {
                 research.getResearchFile().setDeleted(true);
                 research.setDatetimeDeleted(LocalDateTime.now());
                 researchRepository.save(research);
+                logService.saveLog(researchId, CurrentUser.get().getId(), ARCHIVE, RESEARCH);
                 deletedCount.getAndIncrement();
             } catch (Exception e) {
+                logger.error("Error on deleting research " + researchId);
                 e.printStackTrace();
             }
         });
@@ -232,7 +239,7 @@ public class ResearchService {
             budgetStart = queryBuilder.getBudget().get(0);
             budgetEnd = queryBuilder.getBudget().get(1);
         }
-        //logger.info(format("Start %s ---- End %s",budgetStart.toString(),budgetEnd.toString() ));
+
         if (queryBuilder.getDate() != null) {
             startDate = queryBuilder.getDate().get(0);
             endDate = queryBuilder.getDate().get(1);
@@ -284,6 +291,7 @@ public class ResearchService {
                 Research research = researchOptional.get();
                 research.setPublic(!research.isPublic());
                 researchRepository.save(research);
+                logService.saveLog(id, CurrentUser.get().getId(), EDIT, RESEARCH);
                 return new ResponseEntity<String>(research.isPublic() ? "The research is now public" : "The research is now private", OK);
             } else {
                 return new ResponseEntity<String>("Research didn't exist", BAD_REQUEST);
@@ -339,6 +347,7 @@ public class ResearchService {
                 Research research = researchOptional.get();
                 research.setResearchStatus(researchStatus);
                 researchRepository.save(research);
+                logService.saveLog(id, CurrentUser.get().getId(), EDIT, RESEARCH);
                 return new ResponseEntity<String>("Research status has been updated", OK);
             } else {
                 return new ResponseEntity<String>("Research didn't exist", BAD_REQUEST);

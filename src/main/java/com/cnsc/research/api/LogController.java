@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
-import com.cnsc.research.service.PresentationService;
+import com.cnsc.research.domain.model.EntityType;
+import com.cnsc.research.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,20 +13,41 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/log")
 public class LogController {
 
-    private final PresentationService presentationService;
+    private final LogService logService;
 
     @Autowired
-    public LogController(PresentationService presentationService) {
-        this.presentationService = presentationService;
+    public LogController(LogService logService) {
+        this.logService = logService;
     }
 
     @GetMapping("presentation")
     public ResponseEntity getPresentationLogs() {
-        return presentationService.getLogs();
+        return logService.getLogs(EntityType.PRESENTATION);
     }
 
     @GetMapping("presentation/{dataId}")
     public ResponseEntity getPresentationLog(@PathVariable(name = "dataId") Long dataId) {
-        return presentationService.getLog(dataId);
+        return logService.getLog(EntityType.PRESENTATION, dataId);
     }
+
+    @GetMapping("research")
+    public ResponseEntity getResearchLogs() {
+        return logService.getLogs(EntityType.RESEARCH);
+    }
+
+    @GetMapping("research/{dataId}")
+    public ResponseEntity getResearchLog(@PathVariable(name = "dataId") Long dataId) {
+        return logService.getLog(EntityType.RESEARCH, dataId);
+    }
+
+    @GetMapping("publication")
+    public ResponseEntity getPublicationLogs() {
+        return logService.getLogs(EntityType.PUBLICATION);
+    }
+
+    @GetMapping("publication/{dataId}")
+    public ResponseEntity getPublicationLog(@PathVariable(name = "dataId") Long dataId) {
+        return logService.getLog(EntityType.PUBLICATION, dataId);
+    }
+
 }

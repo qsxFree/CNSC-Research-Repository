@@ -1,5 +1,6 @@
 package com.cnsc.research.service;
 
+import com.cnsc.research.configuration.util.CurrentUser;
 import com.cnsc.research.domain.mapper.PublicationMapper;
 import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.model.Researchers;
@@ -21,6 +22,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.cnsc.research.domain.model.EntityType.PUBLICATION;
+import static com.cnsc.research.domain.model.LogAction.*;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -31,18 +34,19 @@ public class PublicationService {
     private final Logger logger;
     private final PublicationMapper publicationMapper;
     private final EntityBuilders entityBuilders;
+    private final LogService logService;
 
     @Autowired
     public PublicationService(PublicationRepository repository,
                               PublicationMapper publicationMapper,
                               Logger logger,
-                              EntityBuilders entityBuilders
-    ) {
+                              EntityBuilders entityBuilders,
+                              LogService logService) {
         this.repository = repository;
         this.logger = logger;
         this.publicationMapper = publicationMapper;
         this.entityBuilders = entityBuilders;
-
+        this.logService = logService;
     }
 
     public ResponseEntity addPublication(ExtendedPublicationDto publicationDto) {
@@ -56,7 +60,8 @@ public class PublicationService {
                     .collect(Collectors.toList());
 
             publication.setResearchers(researchers);
-            repository.save(publication);
+            Publication savedData = repository.save(publication);
+            logService.saveLog(savedData.getPublicationId(), CurrentUser.get().getId(), ADD, PUBLICATION);
             return new ResponseEntity<String>("Publication has successfully added", OK);
         } catch (Exception e) {
             logger.error(format("Error on saving \"%s\"", publicationDto.getPublicationTitle()));
@@ -72,6 +77,7 @@ public class PublicationService {
     public ResponseEntity editPublication(ExtendedPublicationDto publicationDto) {
         try {
             repository.save(publicationMapper.toExtendedDomain(publicationDto));
+            logService.saveLog(publicationDto.getPublicationId(), CurrentUser.get().getId(), EDIT, PUBLICATION);
             return new ResponseEntity<String>("Publication has successfully edited", OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,6 +94,7 @@ public class PublicationService {
                 publication.setDeleted(true);
                 publication.setDateTimeDeleted(LocalDateTime.now());
                 repository.save(publication);
+                logService.saveLog(id, CurrentUser.get().getId(), ARCHIVE, PUBLICATION);
                 deleteMessage = "Publication has been deleted";
             } catch (Exception e) {
                 deleteMessage = e.getMessage();
@@ -114,6 +121,7 @@ public class PublicationService {
                     String title = item.getPublicationTitle();
                     try {
                         repository.save(publicationMapper.toDomain(item));
+                        logService.saveLog(item.getPublicationId(), CurrentUser.get().getId(), ADD, PUBLICATION);
                         return format("Publication Added ::: %s", title);
                     } catch (Exception e) {
                         logger.error(e.getMessage());

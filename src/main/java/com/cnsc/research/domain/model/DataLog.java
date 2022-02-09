@@ -6,28 +6,30 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "data_log")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @Builder
-@Table(name = "presentation_log")
-public class PresentationLog {
-
+@Setter
+@Getter
+public class DataLog {
     @Id
     @Column(name = "log_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long logId;
 
-    @Column(name = "presentation_id")
-    private Long presentationId;
+    @Column(name = "data_id")
+    private Long dataId;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "entity_type")
+    private String entityType;
 
     @Column(name = "action")
     private String action;
 
     @Column(name = "datetime_commit", insertable = false)
     private LocalDateTime dateTimeCommit;
+
+    @Column(name = "user_id")
+    private Long userId;
 }
