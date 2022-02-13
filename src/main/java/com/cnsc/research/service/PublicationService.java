@@ -5,6 +5,7 @@ import com.cnsc.research.domain.mapper.PublicationMapper;
 import com.cnsc.research.domain.model.Publication;
 import com.cnsc.research.domain.model.Researchers;
 import com.cnsc.research.domain.repository.PublicationRepository;
+import com.cnsc.research.domain.transaction.ArchiveDto;
 import com.cnsc.research.domain.transaction.ExtendedPublicationDto;
 import com.cnsc.research.domain.transaction.PublicationQueryBuilder;
 import com.cnsc.research.misc.EntityBuilders;
@@ -25,8 +26,7 @@ import java.util.stream.Collectors;
 import static com.cnsc.research.domain.model.EntityType.PUBLICATION;
 import static com.cnsc.research.domain.model.LogAction.*;
 import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 public class PublicationService {
@@ -171,6 +171,35 @@ public class PublicationService {
             return new ResponseEntity(publicationMapper.toExtendedTransaction(repository.findByResearchers_ResearcherIdIsAndDeletedIsFalse(id)), OK);
         } catch (Exception e) {
             return new ResponseEntity("Error on retrieving publication", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity getArchivedData() {
+        try {
+            List<ExtendedPublicationDto> publicationDtos = publicationMapper.toExtendedTransaction(repository.getDeletedData());
+            List<ArchiveDto<ExtendedPublicationDto>> archivedData = publicationDtos.stream().map(item -> {
+                        return new ArchiveDto<ExtendedPublicationDto>(item, true);
+                    }
+            ).collect(Collectors.toList());
+            return new ResponseEntity<>(archivedData, OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on retrieving archived publication", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity restoreData(Long id) {
+        try {
+            Optional<Publication> publicationOptional = repository.findById(id);
+            if (publicationOptional.isPresent()) {
+                Publication publication = publicationOptional.get();
+                publication.setDeleted(false);
+                logService.saveLog(id, CurrentUser.get().getId(), RESTORE, PUBLICATION);
+                return new ResponseEntity<>("Item restored" + id, OK);
+            } else {
+                return new ResponseEntity("Can't find publication " + id, BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on restoring publication " + id, INTERNAL_SERVER_ERROR);
         }
     }
 }

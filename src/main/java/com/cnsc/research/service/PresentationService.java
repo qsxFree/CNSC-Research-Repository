@@ -6,6 +6,7 @@ import com.cnsc.research.domain.model.Presentation;
 import com.cnsc.research.domain.model.PresentationType;
 import com.cnsc.research.domain.repository.PresentationRepository;
 import com.cnsc.research.domain.repository.ResearchRepository;
+import com.cnsc.research.domain.transaction.ArchiveDto;
 import com.cnsc.research.domain.transaction.PresentationDto;
 import com.cnsc.research.domain.transaction.PresentationQueryBuilder;
 import com.cnsc.research.misc.fields.PresentationFields;
@@ -49,7 +50,7 @@ public class PresentationService {
 
     public ResponseEntity getPresentation(Long presentationId) {
         try {
-            Optional<Presentation> result = repository.findByPresentationIdAndDeletedIsFalse(presentationId);
+            Optional<Presentation> result = repository.findById(presentationId);
             if (result.isPresent()) {
                 return new ResponseEntity<PresentationDto>(mapper.toTransaction(result.get()), OK);
             } else {
@@ -270,5 +271,33 @@ public class PresentationService {
         }
     }
 
+    public ResponseEntity getArchivedData() {
+        try {
+            List<PresentationDto> presentationDtos = mapper.toTransaction(repository.getDeletedData());
+            List<ArchiveDto<PresentationDto>> archivedData = presentationDtos.stream().map(item -> {
+                        return new ArchiveDto<PresentationDto>(item, true);
+                    }
+            ).collect(Collectors.toList());
+            return new ResponseEntity<>(archivedData, OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on retrieving archived presentation", INTERNAL_SERVER_ERROR);
+        }
+    }
 
+
+    public ResponseEntity restoreData(Long id) {
+        try {
+            Optional<Presentation> presentationOptional = repository.findById(id);
+            if (presentationOptional.isPresent()) {
+                Presentation presentation = presentationOptional.get();
+                presentation.setDeleted(false);
+                logService.saveLog(id, CurrentUser.get().getId(), RESTORE, PRESENTATION);
+                return new ResponseEntity<>("Item restored" + id, OK);
+            } else {
+                return new ResponseEntity("Can't find presentation " + id, BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on restoring presentation " + id, INTERNAL_SERVER_ERROR);
+        }
+    }
 }

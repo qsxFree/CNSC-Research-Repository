@@ -390,4 +390,33 @@ public class ResearchService {
             return new ResponseEntity<String>("Error on retrieving top data", INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity getArchivedData() {
+        try {
+            List<ResearchDto> researchDto = researchMapper.toTransaction(researchRepository.getDeleted());
+            List<ArchiveDto<ResearchDto>> archivedData = researchDto.stream().map(item ->
+                    new ArchiveDto<ResearchDto>(item, !researchRepository
+                            .findResearchByTitleAndAvailability(item.getResearchFile().getTitle()))
+            ).collect(Collectors.toList());
+            return new ResponseEntity<>(archivedData, OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on retrieving archived research", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity restoreData(Long id) {
+        try {
+            Optional<Research> researchOptional = researchRepository.findById(id.intValue());
+            if (researchOptional.isPresent()) {
+                Research research = researchOptional.get();
+                research.setDeleted(false);
+                logService.saveLog(id, CurrentUser.get().getId(), RESTORE, RESEARCH);
+                return new ResponseEntity<>("Item restored" + id, OK);
+            } else {
+                return new ResponseEntity("Can't find research " + id, BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error on restoring research " + id, INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -15,6 +15,10 @@ import java.util.Optional;
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
     List<Publication> findByDeletedIsFalse();
 
+    @Query("select p from Publication p where p.deleted = true order by p.dateTimeDeleted DESC")
+    List<Publication> getDeletedData();
+
+
     Optional<Publication> findByPublicationTitleIgnoreCaseAndDeleted(@NonNull String publicationTitle, boolean deleted);
 
     @Query("select p from Publication p where upper(p.publicationTitle) like upper(concat('%', ?1, '%')) and p.deleted = false")

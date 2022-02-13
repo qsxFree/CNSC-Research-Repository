@@ -22,6 +22,9 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
     @Query("select r from Research r where r.isPublic = true and r.deleted = false")
     List<Research> findByIsPublicIsTrueAndDeletedFalse();
 
+    @Query("select r from Research r where r.deleted = true order by r.datetimeDeleted DESC")
+    List<Research> getDeleted();
+
     @Query("select count(r) from Research r where r.deleted = false")
     long countByDeletedIsFalse();
 

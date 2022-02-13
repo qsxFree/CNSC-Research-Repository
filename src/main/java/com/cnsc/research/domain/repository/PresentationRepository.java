@@ -23,6 +23,10 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
 
     List<Presentation> findByDeletedIs(boolean deleted);
 
+    @Query("select p from Presentation p where p.deleted = true order by p.dateTimeDeleted DESC")
+    List<Presentation> getDeletedData();
+
+
     @Query("select p from Presentation p where upper(p.research.researchFile.title) like upper(concat('%', ?1, '%')) and p.deleted = false")
     List<Presentation> findByResearch_ResearchFile_TitleIsLikeIgnoreCaseAndDeletedIsFalse(String title);
 
