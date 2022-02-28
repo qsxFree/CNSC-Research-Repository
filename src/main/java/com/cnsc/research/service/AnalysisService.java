@@ -42,16 +42,16 @@ public class AnalysisService {
         this.logger = logger;
     }
 
-    public ResponseEntity getAgendaResearchCount() {
-        try {
-            List<AgendaCount> result = researchAgendaRepository.retrieveAgendaCount();
-            return new ResponseEntity<List<AgendaCount>>(result, OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-            return new ResponseEntity<String>("Error on retrieving agenda count", INTERNAL_SERVER_ERROR);
-        }
-    }
+//    public ResponseEntity getAgendaResearchCount() {
+//        try {
+//            List<AgendaCount> result = researchAgendaRepository.retrieveAgendaCount();
+//            return new ResponseEntity<List<AgendaCount>>(result, OK);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            logger.error(e.getMessage());
+//            return new ResponseEntity<String>("Error on retrieving agenda count", INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     public ResponseEntity getDeliveryUnitCount() {
         try {
@@ -63,7 +63,7 @@ public class AnalysisService {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
-            return new ResponseEntity<String>("Error on retrieving agenda count", INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<String>("Error on retrieving delivery unit count", INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -74,6 +74,20 @@ public class AnalysisService {
                     .map(item -> new FundingAgencyCount(item.getAgencyName(), item.getResearchSet().size()))
                     .collect(Collectors.toList());
             return new ResponseEntity<List<FundingAgencyCount>>(result, OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return new ResponseEntity<String>("Error on retrieving agency count", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity getResearchAgendaCount() {
+        try {
+            List<AgendaCount> result = researchAgendaRepository.findAll()
+                    .stream()
+                    .map(item -> new AgendaCount(item.getAgenda(), item.getResearchList().size()))
+                    .collect(Collectors.toList());
+            return new ResponseEntity<List<AgendaCount>>(result, OK);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
@@ -119,7 +133,7 @@ public class AnalysisService {
     public ResponseEntity getResearchRelatedCounts() {
         try {
             Map<String, Object> counts = new HashMap<>();
-            counts.put("agenda", getAgendaResearchCount().getBody());
+            counts.put("agenda", getResearchAgendaCount().getBody());
             counts.put("deliveryUnit", getDeliveryUnitCount().getBody());
             counts.put("fundingAgency", getFundingAgencyCount().getBody());
             counts.put("researcher", getResearcherCount().getBody());

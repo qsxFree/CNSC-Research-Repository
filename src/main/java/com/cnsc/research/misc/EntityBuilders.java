@@ -21,6 +21,7 @@ public class EntityBuilders {
     private final DeliveryUnitRepository deliveryUnitRepository;
     private final ResearchFileRepository researchFileRepository;
     private final ResearchRepository researchRepository;
+    private final ResearchAgendaRepository researchAgendaRepository;
     private final Logger logger;
 
     @Autowired
@@ -28,12 +29,13 @@ public class EntityBuilders {
                           ResearchersRepository researchersRepository,
                           DeliveryUnitRepository deliveryUnitRepository,
                           ResearchFileRepository researchFileRepository,
-                          ResearchRepository researchRepository, Logger logger) {
+                          ResearchRepository researchRepository, ResearchAgendaRepository researchAgendaRepository, Logger logger) {
         this.fundingAgencyRepository = fundingAgencyRepository;
         this.researchersRepository = researchersRepository;
         this.deliveryUnitRepository = deliveryUnitRepository;
         this.researchFileRepository = researchFileRepository;
         this.researchRepository = researchRepository;
+        this.researchAgendaRepository = researchAgendaRepository;
         this.logger = logger;
     }
 
@@ -115,5 +117,13 @@ public class EntityBuilders {
         return research.orElseThrow(() -> new Exception(String.format("cannot find %s ", title)));
     }
 
+    public ResearchAgenda buildResearchAgenda(String agenda) {
+        Optional<ResearchAgenda> researchAgenda = researchAgendaRepository.findByAgendaIgnoreCase(agenda);
+        return researchAgenda.orElse(ResearchAgenda
+                .builder()
+                .agenda(agenda)
+                .build()
+        );
+    }
 
 }

@@ -2,7 +2,7 @@ package com.cnsc.research.service;
 
 import com.cnsc.research.domain.model.Documents;
 import com.cnsc.research.domain.repository.DocumentsRepository;
-import com.cnsc.research.misc.storage.DigitalOceanStorageUtility;
+import com.cnsc.research.misc.storage.LocalStorageUtility;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import static org.springframework.http.HttpStatus.*;
 public class DocumentsService {
 
     private final DocumentsRepository repository;
-    private final DigitalOceanStorageUtility storageUtility;
+    private final LocalStorageUtility storageUtility;
     private final Logger logger;
 
     @Autowired
-    public DocumentsService(DocumentsRepository repository, DigitalOceanStorageUtility storageUtility, Logger logger) {
+    public DocumentsService(DocumentsRepository repository, LocalStorageUtility storageUtility, Logger logger) {
         this.repository = repository;
         this.storageUtility = storageUtility;
         this.logger = logger;
@@ -81,8 +81,8 @@ public class DocumentsService {
     public ResponseEntity uploadFile(MultipartFile file) {
         String fileName = "Document" + System.currentTimeMillis();
         try {
-            storageUtility.inContainer(DigitalOceanStorageUtility.DOCUMENT_CONTAINER)
-                    .upload(file, fileName + ".pdf");
+            storageUtility.inContainer(LocalStorageUtility.DOCUMENT_CONTAINER)
+                    .upload(file.getBytes(), fileName + ".pdf");
             return new ResponseEntity<String>(fileName, CREATED);
         } catch (IOException e) {
             e.printStackTrace();
