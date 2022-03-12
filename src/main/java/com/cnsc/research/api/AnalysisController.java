@@ -38,7 +38,7 @@ public class AnalysisController {
 
     @GetMapping("/agenda")
     public ResponseEntity getAgendaResearchCount() {
-        return service.getResearchAgendaCount();
+        return service.getAgendaResearchCount();
     }
 
     @GetMapping("/delivery-unit")

@@ -134,13 +134,6 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
                 .collect(Collectors.toList())
         );
 
-        research.setResearchAgendaList(researchDto.getResearchAgenda()
-                .stream()
-                .map(data ->
-                        entityBuilders.buildResearchAgenda(data.getAgendaName()))
-                .collect(Collectors.toList())
-        );
-
         //mapping delivery unit
         research.setDeliveryUnit(entityBuilders.buildDeliveryUnit(researchDto.getDeliveryUnit().getUnitName()));
 

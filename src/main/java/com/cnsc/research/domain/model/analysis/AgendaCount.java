@@ -11,5 +11,5 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class AgendaCount implements Serializable {
     private String agenda;
-    private Integer count;
+    private Long count;
 }

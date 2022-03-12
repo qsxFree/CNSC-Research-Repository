@@ -11,7 +11,7 @@ import com.cnsc.research.domain.transaction.*;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import com.cnsc.research.misc.importer.CsvImport;
-import com.cnsc.research.misc.storage.LocalStorageUtility;
+import com.cnsc.research.misc.storage.DigitalOceanStorageUtility;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,7 +44,7 @@ public class ResearchService {
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilder;
-    private final LocalStorageUtility storageUtility;
+    private final DigitalOceanStorageUtility storageUtility;
     private final LogService logService;
     private MultipartFile csvFile;
     private CsvImport csv;
@@ -55,7 +55,7 @@ public class ResearchService {
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
                            EntityBuilders entityBuilder,
-                           LocalStorageUtility storageUtility,
+                           DigitalOceanStorageUtility storageUtility,
                            LogService logService) {
         this.entityBuilder = entityBuilder;
         this.logger = logger;
@@ -92,11 +92,6 @@ public class ResearchService {
                 .map(fundingAgency -> entityBuilder.buildFundingAgency(fundingAgency.getAgencyName()))
                 .collect(Collectors.toList()));
 
-        research.setResearchAgendaList(research.getResearchAgendaList().stream()
-                .map(researchAgenda -> entityBuilder.buildResearchAgenda(researchAgenda.getAgenda()))
-                .collect(Collectors.toList())
-        );
-
         research.setResearchers(research.getResearchers().stream()
                 .map(researchers -> entityBuilder.buildResearcher(researchers.getName()))
                 .collect(Collectors.toList()));
@@ -118,8 +113,8 @@ public class ResearchService {
         String fileName = "" + System.currentTimeMillis();
 
         try {
-            storageUtility.inContainer(LocalStorageUtility.PDF_CONTAINER)
-                    .upload(pdfFile.getBytes(), fileName + ".pdf");
+            storageUtility.inContainer(DigitalOceanStorageUtility.PDF_CONTAINER)
+                    .upload(pdfFile, fileName + ".pdf");
             return new ResponseEntity<String>(fileName, CREATED);
         } catch (IOException e) {
             e.printStackTrace();
