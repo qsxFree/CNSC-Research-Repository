@@ -11,7 +11,7 @@ import com.cnsc.research.domain.transaction.*;
 import com.cnsc.research.misc.EntityBuilders;
 import com.cnsc.research.misc.fields.ResearchFields;
 import com.cnsc.research.misc.importer.CsvImport;
-import com.cnsc.research.misc.storage.DigitalOceanStorageUtility;
+import com.cnsc.research.misc.storage.AzureStorageUtility;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,7 +44,7 @@ public class ResearchService {
     private final ResearchRepository researchRepository;
     private final ResearchMapper researchMapper;
     private final EntityBuilders entityBuilder;
-    private final DigitalOceanStorageUtility storageUtility;
+    private final AzureStorageUtility storageUtility;
     private final LogService logService;
     private MultipartFile csvFile;
     private CsvImport csv;
@@ -55,7 +55,7 @@ public class ResearchService {
                            ResearchRepository researchRepository,
                            ResearchMapper researchMapper,
                            EntityBuilders entityBuilder,
-                           DigitalOceanStorageUtility storageUtility,
+                           AzureStorageUtility storageUtility,
                            LogService logService) {
         this.entityBuilder = entityBuilder;
         this.logger = logger;
@@ -113,8 +113,8 @@ public class ResearchService {
         String fileName = "" + System.currentTimeMillis();
 
         try {
-            storageUtility.inContainer(DigitalOceanStorageUtility.PDF_CONTAINER)
-                    .upload(pdfFile, fileName + ".pdf");
+            storageUtility.inContainer(AzureStorageUtility.PDF_CONTAINER)
+                    .upload(pdfFile.getBytes(), fileName + ".pdf");
             return new ResponseEntity<String>(fileName, CREATED);
         } catch (IOException e) {
             e.printStackTrace();
@@ -374,7 +374,6 @@ public class ResearchService {
             return new ResponseEntity<String>("Error on updating research", INTERNAL_SERVER_ERROR);
         }
     }
-
 
     public ResponseEntity getTopData() {
         TopData topData = new TopData();

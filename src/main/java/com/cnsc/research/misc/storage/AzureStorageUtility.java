@@ -20,12 +20,11 @@ public class AzureStorageUtility extends StorageUtility {
 
 
     public AzureStorageUtility() {
-        StorageSharedKeyCredential credential = new StorageSharedKeyCredential("ruuuyin",
-                "BwwmdzBUbX5fYtxXW8Lr7iZhlkuUjeRKfkb9i/B73VWlPw12f9sBMwA6OtDSjedKg/ArDDH7k8DKH68GksMzWg==");
-
+        StorageSharedKeyCredential credential = new StorageSharedKeyCredential("arkibo",
+                "r6GA0bC+mzxJtzk5iIjOpibQADUCOLHydIP1692aQ4NiH1AiTOQYD57VXczbOrjNLjjmWHj23ModKeG03syINQ==");
         blobServiceClient = new BlobServiceClientBuilder()
-                .endpoint("https://ruuuyin.blob.core.windows.net")
-                .sasToken("BwwmdzBUbX5fYtxXW8Lr7iZhlkuUjeRKfkb9i/B73VWlPw12f9sBMwA6OtDSjedKg/ArDDH7k8DKH68GksMzWg==")
+                .endpoint("https://arkibo.blob.core.windows.net")
+                .sasToken("r6GA0bC+mzxJtzk5iIjOpibQADUCOLHydIP1692aQ4NiH1AiTOQYD57VXczbOrjNLjjmWHj23ModKeG03syINQ==")
                 .credential(credential)
                 .buildClient();
 
