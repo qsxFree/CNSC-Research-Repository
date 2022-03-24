@@ -12,7 +12,7 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>Research_Repository</artifactId>
-    <version>0.5.1</version>
+    <version>0.5.3</version>
     <name>Research Repository</name>
     <description>Demo project for Spring Boot</description>
     <properties>
@@ -148,9 +148,9 @@
                 <version>1.14.0</version>
                 <configuration>
                     <schemaVersion>v2</schemaVersion>
-                    <subscriptionId>a0c73892-8a3e-4d31-9eb1-19135b86184f</subscriptionId>
-                    <resourceGroup>arkibo-rss</resourceGroup>
-                    <appName>arkibo-app</appName>
+                    <subscriptionId>2e05665c-402d-4eae-aed7-5d638a9cdcaf</subscriptionId>
+                    <resourceGroup>arkibo</resourceGroup>
+                    <appName>arkibo</appName>
                     <pricingTier>B1</pricingTier>
                     <region>japanwest</region>
                     <runtime>
