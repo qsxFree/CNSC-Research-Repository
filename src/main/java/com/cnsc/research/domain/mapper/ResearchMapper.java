@@ -116,10 +116,7 @@ public class ResearchMapper extends GeneralMapper<Research, ResearchDto> impleme
 
         switch (researchDto.getResearchStatus().toLowerCase()) {
             case "new":
-                research.setResearchStatus(ResearchStatus.NEW);
-                break;
-            case "approved":
-                research.setResearchStatus(ResearchStatus.APPROVED);
+                research.setResearchStatus(ResearchStatus.New);
                 break;
             case "completed":
                 research.setResearchStatus(ResearchStatus.COMPLETED);

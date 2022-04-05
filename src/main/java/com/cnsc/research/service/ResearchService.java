@@ -247,13 +247,10 @@ public class ResearchService {
 
         if (queryBuilder.getStatus() != null) {
             status = queryBuilder.getStatus().stream().map(item -> {
-                ResearchStatus stat = ResearchStatus.NEW;
+                ResearchStatus stat = ResearchStatus.New;
                 switch (item.toLowerCase()) {
                     case "new":
-                        stat = ResearchStatus.NEW;
-                        break;
-                    case "approved":
-                        stat = ResearchStatus.APPROVED;
+                        stat = ResearchStatus.New;
                         break;
                     case "completed":
                         stat = ResearchStatus.COMPLETED;
@@ -307,10 +304,7 @@ public class ResearchService {
             ResearchStatus researchStatus = null;
             switch (status.toLowerCase()) {
                 case "new":
-                    researchStatus = ResearchStatus.NEW;
-                    break;
-                case "approved":
-                    researchStatus = ResearchStatus.APPROVED;
+                    researchStatus = ResearchStatus.New;
                     break;
                 case "completed":
                     researchStatus = ResearchStatus.COMPLETED;
@@ -331,10 +325,7 @@ public class ResearchService {
             ResearchStatus researchStatus = null;
             switch (status.toLowerCase()) {
                 case "new":
-                    researchStatus = ResearchStatus.NEW;
-                    break;
-                case "approved":
-                    researchStatus = ResearchStatus.APPROVED;
+                    researchStatus = ResearchStatus.New;
                     break;
                 case "completed":
                     researchStatus = ResearchStatus.COMPLETED;
@@ -416,6 +407,19 @@ public class ResearchService {
             }
         } catch (Exception e) {
             return new ResponseEntity<>("Error on restoring research " + id, INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity searchPublic(PublicSearchResearchDto researchDto) {
+        try {
+            return new ResponseEntity(researchMapper.toTransaction(researchRepository.findPublic(researchDto.getDeliveryUnit(),
+                    researchDto.getFundingAgency(),
+                    researchDto.getResearcher(),
+                    researchDto.getResearchAgenda(),
+                    researchDto.getTitle()
+            )), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Researches", INTERNAL_SERVER_ERROR);
         }
     }
 }

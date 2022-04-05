@@ -5,7 +5,10 @@ import com.cnsc.research.service.PublicationService;
 import com.cnsc.research.service.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/archive")
@@ -36,17 +39,17 @@ public class ArchiveController {
         return this.publicationService.getArchivedData();
     }
 
-    @PostMapping("research/{id}")
+    @GetMapping("research/{id}")
     public ResponseEntity restoreResearch(@PathVariable(name = "id") Long id) {
         return researchService.restoreData(id);
     }
 
-    @PostMapping("presentation/{id}")
+    @GetMapping("presentation/{id}")
     public ResponseEntity restorePresentation(@PathVariable(name = "id") Long id) {
         return presentationService.restoreData(id);
     }
 
-    @PostMapping("publication/{id}")
+    @GetMapping("publication/{id}")
     public ResponseEntity restorePublication(@PathVariable(name = "id") Long id) {
         return publicationService.restoreData(id);
     }

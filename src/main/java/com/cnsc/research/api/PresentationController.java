@@ -71,6 +71,7 @@ public class PresentationController {
 
     @PostMapping("/list/search")
     public List<PresentationDto> getPresentationAdvanced(@RequestBody PresentationQueryBuilder queryBuilder) {
+        System.out.println(queryBuilder.getResearchers().get(0));
         return service.getPresentationByAdvancedFilter(queryBuilder);
     }
 

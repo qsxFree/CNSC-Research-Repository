@@ -70,6 +70,23 @@ public interface ResearchRepository extends JpaRepository<Research, Integer> {
                                 @Param("researchStatuses") Collection<ResearchStatus> researchStatuses);
 
 
+    @Query(value = "select distinct(r) from Research r" +
+            " left join r.fundingAgencies fundingAgencies " +
+            " left join r.researchers researchers " +
+            " left join r.researchAgendaList agendaList" +
+            " where r.deliveryUnit.unitId = :unitId " +
+            " or fundingAgencies.agencyId = :agencyId " +
+            " or researchers.researcherId = :researcherId " +
+            " or agendaList.agenda like upper(:agenda) " +
+            " or r.researchFile.title like upper(:title)" +
+            " and r.deleted = false"
+    )
+    List<Research> findPublic(@Param("unitId") Integer unitId,
+                              @Param("agencyId") Integer agencyId,
+                              @Param("researcherId") Integer researcherId,
+                              @Param("agenda") String agenda,
+                              @Param("title") String title);
+
     List<Research> findByDeletedIsFalse();
 
     @Query("select max(r.budget) from Research r")
