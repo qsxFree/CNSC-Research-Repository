@@ -45,7 +45,9 @@ public class AnalysisService {
     public ResponseEntity getAgendaResearchCount() {
         try {
             List<AgendaCount> result = researchAgendaRepository.retrieveAgendaCount();
-            return new ResponseEntity<List<AgendaCount>>(result, OK);
+            return new ResponseEntity<List<AgendaCount>>(result.stream().map((item) -> {
+                return new AgendaCount(item.getAgenda(), item.getCount() - 1);
+            }).collect(Collectors.toList()), OK);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
