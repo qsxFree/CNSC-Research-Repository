@@ -409,4 +409,17 @@ public class ResearchService {
             return new ResponseEntity<>("Error on restoring research " + id, INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity searchPublic(PublicSearchResearchDto researchDto) {
+        try {
+            return new ResponseEntity(researchMapper.toTransaction(researchRepository.findPublic(researchDto.getDeliveryUnit(),
+                    researchDto.getFundingAgency(),
+                    researchDto.getResearcher(),
+                    researchDto.getResearchAgenda(),
+                    researchDto.getTitle()
+            )), OK);
+        } catch (Exception e) {
+            return new ResponseEntity("Error on retrieving Researches", INTERNAL_SERVER_ERROR);
+        }
+    }
 }

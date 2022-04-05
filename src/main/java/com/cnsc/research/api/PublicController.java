@@ -1,5 +1,6 @@
 package com.cnsc.research.api;
 
+import com.cnsc.research.domain.transaction.PublicSearchResearchDto;
 import com.cnsc.research.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,11 @@ public class PublicController {
         } catch (Exception e) {
             return new ResponseEntity("Error on retrieving Researches", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/research/search")
+    public ResponseEntity searchResearch(@RequestBody PublicSearchResearchDto researchDto) {
+        return researchService.searchPublic(researchDto);
     }
 
     @GetMapping("/research/{id}")
@@ -152,4 +158,5 @@ public class PublicController {
     public ResponseEntity retrievePresentationByResearcher(@PathVariable(name = "id") Integer id) {
         return presentationService.getPresentationByResearcher(id);
     }
+
 }

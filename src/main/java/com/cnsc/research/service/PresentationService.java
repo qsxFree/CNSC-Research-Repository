@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -170,42 +171,48 @@ public class PresentationService {
     }
 
     public List<PresentationDto> getPresentationByAdvancedFilter(PresentationQueryBuilder queryBuilder) {
-        LocalDate startDate = null, endDate = null;
-        List<PresentationType> types = null;
-        if (queryBuilder.getDate() != null) {
-            startDate = queryBuilder.getDate().get(0);
-            endDate = queryBuilder.getDate().get(1);
+        try {
+            LocalDate startDate = null, endDate = null;
+            List<PresentationType> types = null;
+            if (queryBuilder.getDate() != null) {
+                startDate = queryBuilder.getDate().get(0);
+                endDate = queryBuilder.getDate().get(1);
+            }
+
+            if (queryBuilder.getType() != null) {
+                types = queryBuilder.getType().stream().map(item -> {
+                    PresentationType type = null;
+                    switch (item.toLowerCase()) {
+                        case "local":
+                            type = LOCAL;
+                            break;
+                        case "regional":
+                            type = REGIONAL;
+                            break;
+                        case "national":
+                            type = NATIONAL;
+                            break;
+                        case "international":
+                            type = INTERNATIONAL;
+                            break;
+                        default:
+                    }
+                    return type;
+                }).collect(Collectors.toList());
+            }
+
+            List<Presentation> result = repository.findAdvanced(
+                    queryBuilder.getResearchers(),
+                    startDate,
+                    endDate,
+                    types
+            );
+            return mapper.toTransaction(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
 
-        if (queryBuilder.getType() != null) {
-            types = queryBuilder.getType().stream().map(item -> {
-                PresentationType type = null;
-                switch (item.toLowerCase()) {
-                    case "local":
-                        type = LOCAL;
-                        break;
-                    case "regional":
-                        type = REGIONAL;
-                        break;
-                    case "national":
-                        type = NATIONAL;
-                        break;
-                    case "international":
-                        type = INTERNATIONAL;
-                        break;
-                    default:
-                }
-                return type;
-            }).collect(Collectors.toList());
-        }
-
-        List<Presentation> result = repository.findAdvanced(
-                queryBuilder.getResearchers(),
-                startDate,
-                endDate,
-                types
-        );
-        return mapper.toTransaction(result);
     }
 
     public ResponseEntity triggerVisibility(Long id) {
