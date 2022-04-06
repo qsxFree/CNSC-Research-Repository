@@ -3,6 +3,7 @@ package com.cnsc.research.service;
 import com.cnsc.research.configuration.security.JwtTokenUtil;
 import com.cnsc.research.domain.exception.AccountNotFound;
 import com.cnsc.research.domain.mapper.UserMapper;
+import com.cnsc.research.domain.model.ResetPasswordDto;
 import com.cnsc.research.domain.model.User;
 import com.cnsc.research.domain.repository.UserRepository;
 import com.cnsc.research.domain.transaction.AuthenticationResponse;
@@ -185,6 +186,24 @@ public class UserService {
             logger.error(e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<String>("Error on retrieving user", INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity changePassword(ResetPasswordDto resetPasswordDto) {
+        try {
+            Optional<User> userOptional = userRepository.findById(resetPasswordDto.getId());
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                user.setPassword(resetPasswordDto.getNewPassword());
+                userRepository.save(user);
+                return new ResponseEntity("Password has been updated.", OK);
+            } else {
+                return new ResponseEntity<String>("Can't find user ", BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<String>("Error on resetting password", INTERNAL_SERVER_ERROR);
         }
     }
 }

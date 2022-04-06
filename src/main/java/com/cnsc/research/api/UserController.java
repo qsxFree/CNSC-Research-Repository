@@ -1,6 +1,7 @@
 package com.cnsc.research.api;
 
 import com.cnsc.research.domain.exception.AccountNotFound;
+import com.cnsc.research.domain.model.ResetPasswordDto;
 import com.cnsc.research.domain.transaction.ChangePasswordDto;
 import com.cnsc.research.domain.transaction.UserDto;
 import com.cnsc.research.service.UserService;
@@ -69,5 +70,10 @@ public class UserController {
     @PutMapping("/change-password")
     public ResponseEntity changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         return userService.changePassword(changePasswordDto);
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        return userService.changePassword(resetPasswordDto);
     }
 }
